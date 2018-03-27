@@ -1,0 +1,7 @@
+
+allowedClients = "0.0.0.0/0"
+socksParentProxy = "tor:9050"
+socksProxyType = socks5
+
+proxyAddress = "0.0.0.0"
+proxyPort = 8123

@@ -5,16 +5,16 @@
 REPO=$1
 
 # Ensure experimental flags enabled
-exper=$(cat ~/.docker/config.json | jq -r '.experimental' )
-if [[ $exper != "enabled" ]]
+exper=$(cat ~/.docker/config.json | grep experimental | grep -q enabled )
+if [[ $? != 0 ]]
 then
     echo "Experimental cli flags required for multi arch building"
     exit 1
 fi
 
-# IMAGES=$(find * -maxdepth 1 -type d)
+IMAGES=$(find * -maxdepth 1 -type d)
 # IMAGES=(unifi-exporter)
-IMAGES=(bind9-exporter)
+# IMAGES=(bind9-exporter)
 
 # Loop through all the directories
 for img in $IMAGES; do

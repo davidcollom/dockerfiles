@@ -1,0 +1,19 @@
+FROM arm32v6/alpine AS BUILDER
+
+RUN apk add --update --virtual build-deps go git musl-dev libc-dev binutils make
+
+ENV GOPATH=/go GOOS=linux GOARCH=arm GOARM=7
+ENV CGO_ENABLED=0
+
+# RUN go get github.com/digitalocean/bind_exporter && \
+# cd /go/src/github.com/digitalocean/bind_exporter && \
+# CGO_ENABLED=0 GOOS=linux make
+RUN CGO_ENABLED=0 GOOS=linux go get -a -ldflags '-extldflags "-static"' github.com/digitalocean/bind_exporter
+
+
+
+FROM arm32v6/alpine
+COPY --from=BUILDER /go/bin/bind_exporter /bin/
+EXPOSE 9119
+USER nobody
+ENTRYPOINT ["/bin/bind_exporter"]

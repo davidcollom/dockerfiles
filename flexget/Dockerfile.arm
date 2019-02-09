@@ -1,0 +1,14 @@
+FROM resin/raspberrypi3-python:3.6-slim
+ARG VERSION
+RUN ["cross-build-start"]
+
+RUN pip install --upgrade setuptools && \
+    pip install flexget==$VERSION
+RUN pip install transmissionrpc cfscrape
+RUN apt-get update && apt-get install -y nodejs curl && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN ln -s /usr/bin/nodejs /usr/bin/node
+
+RUN ["cross-build-end"]
+
+
+CMD ["flexget -c /root/flexget.yml execute"]

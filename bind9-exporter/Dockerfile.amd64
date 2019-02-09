@@ -1,0 +1,13 @@
+FROM alpine AS BUILDER
+
+RUN apk add --update --virtual build-deps go git musl-dev libc-dev binutils make
+
+ENV GOPATH=/go CGO_ENABLED=0
+
+RUN CGO_ENABLED=0 GOOS=linux go get -a -ldflags '-extldflags "-static"' github.com/digitalocean/bind_exporter
+
+FROM alpine
+COPY --from=BUILDER /go/bin/bind_exporter /bin/
+EXPOSE 9119
+USER nobody
+ENTRYPOINT ["/bin/bind_exporter"]

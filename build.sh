@@ -5,7 +5,7 @@
 REPO=$1
 
 # Ensure experimental flags enabled
-exper=$(cat ${DOCKER_CONFIG:-~/.docker/config.json} | grep experimental | grep -q enabled )
+exper=$(cat ${DOCKER_CONFIG:-~/.docker}/config.json | grep experimental | grep -q enabled )
 if [[ $? != 0 ]]
 then
     echo "Experimental cli flags required for multi arch building"

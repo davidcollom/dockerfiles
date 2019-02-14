@@ -21,6 +21,7 @@ for img in $IMAGES; do
     pushd $img
     if [ -f .skip ]; then
         echo "Skipping building of ${img} due to .skip file present"
+        popd
         continue
     fi
     version=$(cat VERSION 2>/dev/null)

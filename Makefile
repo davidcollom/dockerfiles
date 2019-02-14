@@ -5,7 +5,7 @@ DOCKER_USER 	?=
 DOCKER_PASSWORD ?=
 
 login: setup
-	echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USER) --password-stdin
+	echo "$(DOCKER_PASSWORD)" | docker login -u $(DOCKER_USER) --password-stdin
 
 setup:
 	mkdir ./docker

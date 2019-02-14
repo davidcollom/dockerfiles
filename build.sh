@@ -35,39 +35,41 @@ for img in $IMAGES; do
         echo "Not a Multi-Arch directory - standard build/push"
         docker build --build-arg VERSION=${version:-latest} -t $imgname -f ${dckr_images[0]} .
         docker push $imgname
-    else
-        echo $dckr_images
-        # Loop through all Dockerfiles    
-        for dckr_file in $dckr_images; do
-            arch="${dckr_file##*.}"
-            # Build Image
-            docker build --pull --build-arg VERSION=${version:-latest} -t "${imgname}-${arch}" -f $dckr_file .
-            # Push Image (Needs to exist for creating manifests)
-            docker push "${imgname}-${arch}"
-            all_imgs+="${imgname}-${arch} "
-        done
-        for addimg in $add_images; do
-            addimgname=$(cat $addimg)
-            all_imgs+=" ${addimgname}"
-        done
-
-        # Create the Manifest 
-        docker manifest create --amend ${imgname} ${all_imgs}
-
-        # We need to loop back again
-        # So that we can annotate the images with os/arch
-        for dckr_file in $dckr_images; do
-            arch="${dckr_file##*.}"
-            docker manifest annotate ${imgname} "${imgname}-${arch}" --os linux --arch=${arch}
-        done
-
-        for add_img in $add_images; do
-            arch="${add_img##*.}"
-            addimgname=$(cat ${add_img})
-            docker manifest annotate ${imgname} "${addimgname}" --os linux --arch=${arch}
-        done
-        # Finally push the manifest to the hub
-        docker manifest push -p ${imgname}
+        popd
+        continue
     fi
+
+    echo $dckr_images
+    # Loop through all Dockerfiles    
+    for dckr_file in $dckr_images; do
+        arch="${dckr_file##*.}"
+        # Build Image
+        docker build --pull --build-arg VERSION=${version:-latest} -t "${imgname}-${arch}" -f $dckr_file .
+        # Push Image (Needs to exist for creating manifests)
+        docker push "${imgname}-${arch}"
+        all_imgs+="${imgname}-${arch} "
+    done
+    for addimg in $add_images; do
+        addimgname=$(cat $addimg)
+        all_imgs+=" ${addimgname}"
+    done
+
+    # Create the Manifest 
+    docker manifest create --amend ${imgname} ${all_imgs}
+
+    # We need to loop back again
+    # So that we can annotate the images with os/arch
+    for dckr_file in $dckr_images; do
+        arch="${dckr_file##*.}"
+        docker manifest annotate ${imgname} "${imgname}-${arch}" --os linux --arch=${arch}
+    done
+
+    for add_img in $add_images; do
+        arch="${add_img##*.}"
+        addimgname=$(cat ${add_img})
+        docker manifest annotate ${imgname} "${addimgname}" --os linux --arch=${arch}
+    done
+    # Finally push the manifest to the hub
+    docker manifest push -p ${imgname}
     popd
 done

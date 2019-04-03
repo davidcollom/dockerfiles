@@ -12,8 +12,12 @@ then
     exit 1
 fi
 
-# IMAGES=$(find * -maxdepth 1 -type d)
-IMAGES=${@:2}
+IMAGES=$(find * -maxdepth 1 -type d)
+if [[ ! -z $2 ]]; then
+    IMAGES=${@:2}
+fi
+
+echo "Processing: $IMAGES.."
 
 # Loop through all the directories
 for img in $IMAGES; do

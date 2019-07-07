@@ -1,2 +1,2 @@
 ARG VERSION
-FROM lroguet/rpi-home-assistant:$VERSION
+FROM homeassistant/raspberrypi-homeassistant:$VERSION

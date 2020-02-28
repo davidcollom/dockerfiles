@@ -1,7 +1,5 @@
 ARG VERSION
-# FROM raigen/rpi-alpine-perl:5.24.0
 FROM hypriot/rpi-alpine:3.5
-# FROM balenalib/rpi-alpine:3.11
 
 # RUN apk add --no-cache --update wget perl perl-utils perl-app-cpanminus \
 RUN apk add --no-cache --update perl perl-libwww perl-io-socket-ssl perl-uri perl-json perl-pathtools perl-log-log4perl make \

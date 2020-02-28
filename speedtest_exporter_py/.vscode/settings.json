@@ -1,6 +1,0 @@
-// .vscode/setting.json
-// プロジェクト内の設定
-{
-  "python.linting.pylintEnabled": false,
-  "python.linting.flake8Enabled": true
-}

@@ -1,3 +1,4 @@
+ARG VERSION
 FROM alpine AS BUILDER
 
 RUN apk add --update --virtual build-deps go git musl-dev libc-dev binutils make

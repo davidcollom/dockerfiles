@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# set -e
+set -e
 # set -x
 
 REPO=$1
@@ -12,12 +12,14 @@ then
     exit 1
 fi
 
-IMAGES=$(find * -maxdepth 1 -type d)
+# if x have been provided ONLY build those
 if [[ ! -z $2 ]]; then
-    IMAGES=${@:2}
+    IMAGES=(${@:2})
+else
+    IMAGES=$(find * -maxdepth 1 -type d)
 fi
 
-echo "Processing: $IMAGES.."
+echo "Processing: $IMAGES\n"
 
 # Loop through all the directories
 for img in $IMAGES; do
@@ -26,6 +28,10 @@ for img in $IMAGES; do
         echo "Skipping building of ${img} due to .skip file present"
         continue
     fi
+    if [ ! -f ${img}/VERSION ]; then
+        echo "No version file found for ${img} - one is required."
+    fi
+
     version=$(cat ${img}/VERSION 2>/dev/null)
     imgname="${REPO}/${img}:${version:-latest}"
     all_imgs=""
@@ -35,7 +41,7 @@ for img in $IMAGES; do
 
     if [[ $multi_arch == '1' ]]; then
         echo "Not a Multi-Arch directory - standard build/push"
-        docker build --build-arg VERSION=${version:-latest} -t $imgname -f ${dckr_images[0]} $img/ | sed "s/^/\[$img\] /"
+        docker build --pull --build-arg VERSION=${version:-latest} -t $imgname -f ${dckr_images[0]} $img/ | sed "s/^/\[$img\] /"
         docker push $imgname  | sed "s/^/\[$img\] /"
         continue
     fi
@@ -45,7 +51,7 @@ for img in $IMAGES; do
     for dckr_file in $dckr_images; do
         arch="${dckr_file##*.}"
         # Build Image
-        docker build --pull --build-arg VERSION=${version:-latest} -t "${imgname}-${arch}" -f $dckr_file $img/ | sed "s/^/\[$img\] /"
+        docker build --pull --build-arg VERSION=${version:-latest} -t "${imgname}-${arch}" -f $dckr_file $img/ | sed "s/^/\[$img\][$arch\] /"
         # Push Image (Needs to exist for creating manifests)
         docker push "${imgname}-${arch}" | sed "s/^/\[$img\] /"
         all_imgs+="${imgname}-${arch} "

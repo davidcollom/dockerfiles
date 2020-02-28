@@ -1,0 +1,12 @@
+FROM hypriot/rpi-alpine:3.5
+
+ARG VERSION=0.3.0
+
+RUN apk add --no-cache wget ca-certificates
+
+RUN wget -q -O /speedtest_exporter https://bintray.com/artifact/download/nlamirault/oss/speedtest_exporter-${VERSION}_linux_arm && \
+  chmod a+rx /speedtest_exporter
+
+COPY entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]

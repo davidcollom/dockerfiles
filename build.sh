@@ -16,7 +16,7 @@ fi
 if [[ ! -z $2 ]]; then
     IMAGES=(${@:2})
 else
-    IMAGES=$(find * -maxdepth 1 -type d)
+    IMAGES=$(find * -maxdepth 1 -type f -iname VERSION | cut -d'/' -f 1)
 fi
 
 echo "Processing: $IMAGES\n"

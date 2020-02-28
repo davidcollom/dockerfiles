@@ -1,9 +1,9 @@
 
 NAMESPACE ?= davidcollom
 
-DOCKER_USER 	?=
+DOCKER_USER 	  ?=
 DOCKER_PASSWORD ?=
-DOCKER_CONFIG   ?=
+DOCKER_CONFIG   ?= $(HOME)/.docker/
 
 login: setup
 	echo "$(DOCKER_PASSWORD)" | docker login -u $(DOCKER_USER) --password-stdin

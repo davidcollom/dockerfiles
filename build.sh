@@ -51,9 +51,9 @@ for img in $IMAGES; do
     for dckr_file in $dckr_images; do
         arch="${dckr_file##*.}"
         # Build Image
-        docker build --pull --build-arg VERSION=${version:-latest} -t "${imgname}-${arch}" -f $dckr_file $img/ | sed "s/^/\[$img\][$arch\] /"
+        docker build --pull --build-arg VERSION=${version:-latest} -t "${imgname}-${arch}" -f $dckr_file $img/ | sed "s/^/\[$img@$arch\] /"
         # Push Image (Needs to exist for creating manifests)
-        docker push "${imgname}-${arch}" | sed "s/^/\[$img\] /"
+        docker push "${imgname}-${arch}" | sed "s/^/\[$img@$arch\] /"
         all_imgs+="${imgname}-${arch} "
     done
     for addimg in $add_images; do
@@ -68,13 +68,13 @@ for img in $IMAGES; do
     # So that we can annotate the images with os/arch
     for dckr_file in $dckr_images; do
         arch="${dckr_file##*.}"
-        docker manifest annotate ${imgname} "${imgname}-${arch}" --os linux --arch=${arch} | sed "s/^/\[$img\] /"
+        docker manifest annotate ${imgname} "${imgname}-${arch}" --os linux --arch=${arch} | sed "s/^/\[$img@$arch\] /"
     done
 
     for add_img in $add_images; do
         arch="${add_img##*.}"
         addimgname=$(cat ${add_img})
-        docker manifest annotate ${imgname} "${addimgname}" --os linux --arch=${arch} | sed "s/^/\[$img\] /"
+        docker manifest annotate ${imgname} "${addimgname}" --os linux --arch=${arch} | sed "s/^/\[$img@$arch\] /"
     done
     # Finally push the manifest to the hub
     docker manifest push -p ${imgname} | sed "s/^/\[$img\] /"

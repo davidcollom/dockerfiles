@@ -1,0 +1,5 @@
+FROM alpine
+COPY hub3-amd /bin/hub3-exporter
+EXPOSE 9463
+USER nobody
+ENTRYPOINT ["/bin/hub3-exporter"]

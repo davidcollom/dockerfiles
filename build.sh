@@ -47,7 +47,7 @@ for img in $IMAGES; do
     fi
 
     echo $dckr_images
-    # Loop through all Dockerfiles    
+    # Loop through all Dockerfiles
     for dckr_file in $dckr_images; do
         arch="${dckr_file##*.}"
         # Build Image
@@ -56,12 +56,12 @@ for img in $IMAGES; do
         docker push "${imgname}-${arch}" | sed "s/^/\[$img@$arch\] /"
         all_imgs+="${imgname}-${arch} "
     done
-    for addimg in $add_images; do
-        addimgname=$(cat $addimg)
+    for add_img in $add_images; do
+        addimgname=$(cat $add_img | sed "s/\[VERSION\]/${version}/")
         all_imgs+=" ${addimgname}"
     done
 
-    # Create the Manifest 
+    # Create the Manifest
     docker manifest create --amend ${imgname} ${all_imgs} | sed "s/^/\[$img\] /"
 
     # We need to loop back again
@@ -73,7 +73,7 @@ for img in $IMAGES; do
 
     for add_img in $add_images; do
         arch="${add_img##*.}"
-        addimgname=$(cat ${add_img})
+        addimgname=$(cat ${add_img} | sed "s/\[VERSION\]/${version}/")
         docker manifest annotate ${imgname} "${addimgname}" --os linux --arch=${arch} | sed "s/^/\[$img@$arch\] /"
     done
     # Finally push the manifest to the hub

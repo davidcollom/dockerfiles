@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - github-actions
   pull_request:
     branches:
       - main
@@ -61,10 +60,13 @@ jobs:
       uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8
 
   build-images:
-    needs: generate-changed-matrix
+    needs: generate-all-matrix
     strategy:
-      matrix: ${{fromJson( needs.generate-changed-matrix.matrix )}}
-
+      matrix: ${{fromJson( needs.generate-all-matrix.outputs.matrix )}}
     uses: ./.github/workflows/build-image.yaml
     with:
       image-name: ${{matrix.images}}
+      push: false
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

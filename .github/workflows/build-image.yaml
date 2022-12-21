@@ -7,12 +7,22 @@ on:
         description: "Image/Dir to build"
         type: string
         required: true
+      push:
+        description: "Push or Not the image"
+        type: boolean
+        default: false
+        required: true
 
   workflow_call:
     inputs:
       image-name:
         description: "Image/Dir to build"
         type: string
+        required: true
+      push:
+        description: "Push or Not the image"
+        type: boolean
+        default: false
         required: true
 
 
@@ -66,7 +76,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: "${{inputs.image-name}}/"
-          push: true
+          push: ${{inputs.push}}
           pull: true
           build-args: VERSION=${{steps.set_meta.outputs.VERSION}}
           platforms: ${{steps.set_meta.outputs.PLATFORMS}}

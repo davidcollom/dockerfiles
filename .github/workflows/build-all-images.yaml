@@ -59,8 +59,11 @@ jobs:
   build-images:
     needs: generate-all-matrix
     strategy:
+      fail-fast: false
       matrix: ${{fromJson( needs.generate-all-matrix.outputs.matrix )}}
-
     uses: ./.github/workflows/build-image.yaml
     with:
       image-name: ${{matrix.images}}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

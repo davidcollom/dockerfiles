@@ -67,7 +67,7 @@ jobs:
     uses: ./.github/workflows/build-image.yaml
     with:
       image-name: ${{matrix.images}}
-      push: false
+      push: ${{ github.event_name == 'push' }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

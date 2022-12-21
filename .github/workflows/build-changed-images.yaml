@@ -60,9 +60,9 @@ jobs:
       uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8
 
   build-images:
-    needs: generate-all-matrix
+    needs: generate-changed-matrix
     strategy:
-      matrix: ${{fromJson( needs.generate-all-matrix.outputs.matrix )}}
+      matrix: ${{fromJson( needs.generate-changed-matrix.outputs.matrix )}}
     uses: ./.github/workflows/build-image.yaml
     with:
       image-name: ${{matrix.images}}

@@ -1,0 +1,75 @@
+name: Build Containers
+
+on:
+  push:
+    branches:
+      - main
+      - github-actions
+  pull_request:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}
+
+env:
+  searchpath: "./"
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+
+    steps:
+    - name: Clean up runner
+      run: |
+        rm -f ~/.ssh/*
+        rm -f ~/.gitconfig
+      continue-on-error: true
+    - name: Clean Workspace
+      uses: AutoModality/action-clean@d004b47eb728f2a83316fc70ba9a62ef97278013 # v1.1.0
+
+    - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
+      name: pulling the branch
+      with:
+        fetch-depth: 5
+
+    - name: Get Changes
+      id: files
+      uses: jitterbit/get-changed-files@v1
+      with:
+        format: 'space-delimited'
+
+    - name: Storing changed/removed files listings
+      run: |
+        set -x
+        touch images.list
+        echo "${{ steps.files.outputs.all }}" | sed 's/ /\n/g' | awk -F/ '
+            BEGIN { ORS = ""; print "{ \"image\": [ "}
+            /(^[a-zA-Z]*)/ {a[$2]++}
+            END{
+              i=0;
+              for(b in a) {
+                i++;
+                printf "\""b"\"";
+                if (i != length(a)) print ", ";
+                }
+              print " ] }"
+              }
+        ' >> images.list
+        echo "List of images:"
+        cat images.list
+
+    - name: Create matrix to deploy
+      id: matrix
+      run: |
+        if [ "$(jq '.chartname | length' images.list)" == "0" ]; then
+          echo "::set-output name=empty::true"
+        else
+          echo "::set-output name=empty::false"
+        fi
+        echo "::set-output name=matrix::$(cat images.list)"
+
+    - name: Cancelling for empty matrix
+      if: ${{ steps.matrix.outputs.empty == 'true' }}
+      uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8

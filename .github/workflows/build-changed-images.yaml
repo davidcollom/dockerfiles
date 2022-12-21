@@ -1,0 +1,71 @@
+name: Build Changed Container Images
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - github-actions
+
+jobs:
+  generate-changed-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+
+    steps:
+    - name: Clean up runner
+      run: |
+        rm -f ~/.ssh/*
+        rm -f ~/.gitconfig
+      continue-on-error: true
+
+    - name: Clean Workspace
+      if: ${{ !env.ACT }}
+      uses: AutoModality/action-clean@d004b47eb728f2a83316fc70ba9a62ef97278013 # v1.1.0
+
+    - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
+      name: pulling the branch
+      with:
+        fetch-depth: 50
+
+    - name: Get Changes
+      id: changes
+      uses: jitterbit/get-changed-files@v1
+      with:
+        format: 'json'
+
+    - name: Storing changed/removed files listings
+      id: matrix
+      run: |
+        set -x
+        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z0-9_-]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.all }}' >> images.list
+        echo "List of images:"
+        cat images.list
+
+        if [ "$(jq '.images | length' images.list)" == "0" ]; then
+          echo "empty=true" >> $GITHUB_OUTPUT
+        else
+          echo "empty=false" >> $GITHUB_OUTPUT
+        fi
+        echo "matrix=$(cat images.list)" >> $GITHUB_OUTPUT
+
+    - name: Cancelling for empty matrix
+      if: ${{ steps.matrix.outputs.empty == 'true' }}
+      uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8
+
+  build-images:
+    needs: generate-changed-matrix
+    strategy:
+      matrix: ${{fromJson( needs.generate-changed-matrix.outputs.matrix )}}
+      fail-fast: false
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image-name: ${{matrix.images}}
+      push: ${{ github.event_name == 'push' }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

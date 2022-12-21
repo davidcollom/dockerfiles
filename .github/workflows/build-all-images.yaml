@@ -1,0 +1,71 @@
+name: Build ALL Images
+
+on:
+  workflow_dispatch:
+
+# ONLY EVER RUN ONE
+concurrency: ${{ github.workflow }}
+
+jobs:
+  generate-all-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+
+    steps:
+    - name: Clean up runner
+      if: ${{ !env.ACT }}
+      run: |
+        rm -f ~/.ssh/*
+        rm -f ~/.gitconfig
+      continue-on-error: true
+
+    - name: Clean Workspace
+      if: ${{ !env.ACT }}
+      uses: AutoModality/action-clean@d004b47eb728f2a83316fc70ba9a62ef97278013 # v1.1.0
+
+    - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
+      # if: ${{ !env.ACT }}
+      name: pulling the branch
+      with:
+        fetch-depth: 1
+
+    - name: List Dockerfiles
+      uses: tj-actions/glob@v16
+      id: list-dockerfiles
+      with:
+        strip-top-level-dir: true
+        files: |
+          **/Dockerfile
+
+    - name: build-matrix
+      id: matrix
+      run: |
+        set -x
+        touch images.list
+        LIST=(${{steps.list-dockerfiles.outputs.paths}})
+        jq --compact-output --null-input '{"images": [$ARGS.positional[] | split("/") | .[0]] | sort | unique}' --args -- "${LIST[@]}" > images.list
+
+        if [ "$(jq '.images | length' images.list)" == "0" ]; then
+          echo empty=true >> $GITHUB_OUTPUT
+        else
+          echo empty=false >> $GITHUB_OUTPUT
+        fi
+        echo matrix=$(cat images.list) >> $GITHUB_OUTPUT
+
+    - name: Cancelling for empty matrix
+      if: ${{ steps.matrix.outputs.empty == 'true' }}
+      uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8
+
+  build-images:
+    needs: generate-all-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson( needs.generate-all-matrix.outputs.matrix )}}
+    uses: ./.github/workflows/build-image.yaml
+    with:
+      image-name: ${{matrix.images}}
+      push: true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

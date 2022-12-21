@@ -1,0 +1,14 @@
+FROM resin/raspberrypi3-python:3.6-slim
+
+RUN mkdir -p               /opt/exporter
+COPY requirements.txt       /opt/exporter
+
+RUN \
+     pip3 install -r /opt/exporter/requirements.txt
+
+COPY mercedes_me.py  /opt/exporter/
+
+USER       nobody
+EXPOSE     9353/tcp
+WORKDIR    /opt/exporter/
+ENTRYPOINT [ "python3", "mercedes_me.py" ]

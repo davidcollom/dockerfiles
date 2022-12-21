@@ -9,8 +9,8 @@ login: setup
 	echo "$(DOCKER_PASSWORD)" | docker login -u $(DOCKER_USER) --password-stdin
 
 setup:
-	mkdir $(DOCKER_CONFIG)
-	cp docker.cfg $(DOCKER_CONFIG)/config.json
+	# mkdir $(DOCKER_CONFIG)
+	# cp docker.cfg $(DOCKER_CONFIG)/config.json
 
 build: setup
 	./build.sh $(NAMESPACE)

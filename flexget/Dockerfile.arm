@@ -1,14 +1,21 @@
-FROM resin/raspberrypi3-python:3.6-slim
+# FROM resin/raspberrypi3-python:3.6-slim
+# FROM python:3.9-slim@sha256:8f4c1bcd2a65887728306e27f620a645c3672146debab2ff7f0cb4452a5694ff
+FROM python:3.9-slim@sha256:94f780f5381a92cade2b3dddf9edf1c00141b5373d5d5c03154086962d537fdd
+
 ARG VERSION
-RUN ["cross-build-start"]
+# RUN ["cross-build-start"]
 
-RUN pip install --upgrade setuptools && \
+RUN apt-get update && \
+    apt-get install -y nodejs curl python3-dev build-essential vim sqlite3 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip install setuptools && \
     pip install flexget==$VERSION
-RUN pip install transmissionrpc cfscrape
-RUN apt-get update && apt-get install -y nodejs curl && apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN ln -s /usr/bin/nodejs /usr/bin/node
+RUN pip install transmission-rpc cfscrape cloudscraper pysocks
+# RUN ln -s /usr/bin/nodejs /usr/bin/node
 
-RUN ["cross-build-end"]
+# RUN ["cross-build-end"]
 
-
+WORKDIR /root/
+ENV TZ Europe/London
 CMD ["flexget -c /root/flexget.yml execute"]

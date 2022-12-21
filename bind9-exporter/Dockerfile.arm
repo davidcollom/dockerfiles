@@ -9,7 +9,8 @@ ENV CGO_ENABLED=0
 # RUN go get github.com/digitalocean/bind_exporter && \
 # cd /go/src/github.com/digitalocean/bind_exporter && \
 # CGO_ENABLED=0 GOOS=linux make
-RUN CGO_ENABLED=0 GOOS=linux go get -a -ldflags '-extldflags "-static"' github.com/digitalocean/bind_exporter
+# RUN CGO_ENABLED=0 GOOS=linux go get -a -ldflags '-extldflags "-static"' github.com/digitalocean/bind_exporter
+RUN GOOS=linux go get -a -v github.com/digitalocean/bind_exporter
 
 
 

@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  isp_exporter:
+    ports:
+      - 9353:9353/tcp
+    image: davidcollom/isp_exporter:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      EXPORTER_INTERVAL: "*/1 * * * *"
+
+  prom:
+    image: quay.io/prometheus/prometheus:latest
+    volumes:
+     - ./prometheus.sample.yml:/etc/prometheus/prometheus.yml
+    command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus"
+    ports:
+     - 9090:9090
+    depends_on:
+     - isp_exporter
+
+  grafana:
+    image: grafana/grafana
+    ports:
+     - "3000:3000"
+    depends_on:
+      - prom

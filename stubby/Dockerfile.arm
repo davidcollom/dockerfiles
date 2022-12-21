@@ -15,12 +15,9 @@ WORKDIR build
 RUN cmake -DBUILD_STUBBY=ON  -DUSE_LIBIDN2=OFF -DENABLE_STUB_ONLY=ON .. && make && make install && ldconfig
 
 
-
-
-
 FROM arm32v5/debian:buster
 
-RUN apt-get update && apt-get install -y libyaml-0-2 openssl
+RUN apt-get update && apt-get install -y libyaml-0-2 openssl ca-certificates
 
 COPY --from=builder /usr/local/bin/stubby /stubby
 

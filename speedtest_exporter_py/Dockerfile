@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.9-alpine
 
 RUN mkdir -p               /opt/speedtest_exporter
 ADD speedtest_exporter.py  /opt/speedtest_exporter

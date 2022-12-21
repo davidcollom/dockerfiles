@@ -14,9 +14,10 @@ RUN git checkout v${VERSION} && git submodule update --init && mkdir build
 WORKDIR build
 RUN cmake -DBUILD_STUBBY=ON  -DUSE_LIBIDN2=OFF -DENABLE_STUB_ONLY=ON .. && make && make install && ldconfig
 
+
 ARG VERSION
 FROM debian:buster
-RUN apt-get update && apt-get install -y libyaml-0-2 openssl
+RUN apt-get update && apt-get install -y libyaml-0-2 openssl ca-certificates
 COPY --from=builder /usr/local/bin/stubby /stubby
 
 EXPOSE 8053

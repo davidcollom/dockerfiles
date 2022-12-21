@@ -1,0 +1,9 @@
+# Copyright (c) 2021 Tailscale Inc & AUTHORS All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+ARG VERSION
+
+FROM ghcr.io/tailscale/tailscale:$VERSION@sha256:a975e0360f7eb3727fccdf64438e83440111de4b29abfc657f2f14a19523b256
+COPY run.sh /run.sh
+RUN mkdir /.cache; chown 1000:1000 /.cache
+CMD "/run.sh"

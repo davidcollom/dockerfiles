@@ -3,15 +3,8 @@ name: Build Image
 on:
   workflow_dispatch:
     inputs:
-      image_name:
+      image-name:
         required: true
-        type: string
-
-  # workflow_call:
-  #   inputs:
-  #     image_name:
-  #       required: true
-  #       type: string
 
 jobs:
   build_container_images:
@@ -22,11 +15,12 @@ jobs:
 
       - name: Set Metadata
         id: set_meta
-        working-directory: ${{ inputs.image_name }}/
+        working-directory: "./${{ inputs.image-name }}/"
         run: |
+          pwd
           echo VERSION=$(cat VERSION) >> $GITHUB_OUTPUT
-          if [ -e PLATFORMS ];
-            echo PLATFORMS=$(tr '\m' ',' PLATFORMS) >> $GITHUB_OUTPUT
+          if [ -e PLATFORMS ]; then
+            echo PLATFORMS=$(cat PLATFORMS | tr '\n' ',' ) >> $GITHUB_OUTPUT
           else
             echo "PLATFORMS=" >> $GITHUB_OUTPUT
           fi
@@ -45,6 +39,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:mysubdir"
+          context: "${{input.image_name}}/"
           push: true
           tags:  ${{ secrets.DOCKERHUB_USERNAME }}/${{input.image_name}}:${{steps.set_meta.outputs.VERSION}}

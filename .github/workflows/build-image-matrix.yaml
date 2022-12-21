@@ -65,6 +65,6 @@ jobs:
     strategy:
       matrix: ${{fromJson( needs.generate-matrix.outputs.matrix )}}
 
-    uses: my-super-sweet-project/shared-workflows/.github/workflows/sample.yaml@main
+    uses: .github/workflows/build-image.yaml
     with:
       image-name: ${{matrix.images}}

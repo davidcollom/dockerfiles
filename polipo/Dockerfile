@@ -6,7 +6,7 @@ RUN apk update && \
     apk add --no-cache build-base git texinfo && \
     git clone https://github.com/jech/polipo /tmp/polipo && \
     cd /tmp/polipo && \
-    git checkout ${VERSION} && \
+    git checkout polipo-${VERSION} && \
     make all && \
     make install
 

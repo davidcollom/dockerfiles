@@ -1,13 +1,13 @@
-ARG VERSION
-FROM alpine AS BUILDER
+FROM alpine:latest AS BUILDER
 
 RUN apk add --update --virtual build-deps go git musl-dev libc-dev binutils make
+ENV GOPATH=/go
 
-ENV GOPATH=/go CGO_ENABLED=0
+ARG VERSION=0.6.0
 
-RUN CGO_ENABLED=0 GOOS=linux go get -a -ldflags '-extldflags "-static"' github.com/digitalocean/bind_exporter
+RUN go install github.com/prometheus-community/bind_exporter@v${VERSION}
 
-FROM alpine
+FROM alpine:latest
 COPY --from=BUILDER /go/bin/bind_exporter /bin/
 EXPOSE 9119
 USER nobody

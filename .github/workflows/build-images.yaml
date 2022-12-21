@@ -11,9 +11,6 @@ on:
 
 concurrency: ${{ github.workflow }}
 
-env:
-  searchpath: "./"
-
 jobs:
   generate-matrix:
     runs-on: ubuntu-latest
@@ -46,7 +43,7 @@ jobs:
         touch images.list
         echo "${{ steps.files.outputs.all }}" | sed 's/ /\n/g' | awk -F/ '
             BEGIN { ORS = ""; print "{ \"image\": [ "}
-            /(^[a-zA-Z]*)/ {a[$2]++}
+            /(^[a-zA-Z]*)\// {a[$2]++}
             END{
               i=0;
               for(b in a) {
@@ -64,11 +61,11 @@ jobs:
       id: matrix
       run: |
         if [ "$(jq '.chartname | length' images.list)" == "0" ]; then
-          echo "::set-output name=empty::true"
+          echo "empty::true" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=empty::false"
+          echo "empty::false" >> $GITHUB_OUTPUT
         fi
-        echo "::set-output name=matrix::$(cat images.list)"
+        echo "matrix::$(cat images.list)" >> $GITHUB_OUTPUT
 
     - name: Cancelling for empty matrix
       if: ${{ steps.matrix.outputs.empty == 'true' }}

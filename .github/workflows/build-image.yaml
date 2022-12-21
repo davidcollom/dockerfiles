@@ -24,7 +24,13 @@ on:
         type: boolean
         default: false
         required: true
-
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+        description: Docker hub username
+      DOCKERHUB_TOKEN:
+        required: true
+        description: Docker hub Token
 
 jobs:
   build_images:

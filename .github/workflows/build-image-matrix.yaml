@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - github-actions
+      # - github-actions
   pull_request:
     branches:
       - main
-      - github-actions
+      # - github-actions
 
 concurrency: ${{ github.workflow }}
 

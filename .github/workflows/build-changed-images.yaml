@@ -63,6 +63,7 @@ jobs:
     needs: generate-changed-matrix
     strategy:
       matrix: ${{fromJson( needs.generate-changed-matrix.outputs.matrix )}}
+      fail-fast: false
     uses: ./.github/workflows/build-image.yaml
     with:
       image-name: ${{matrix.images}}

@@ -3,7 +3,9 @@ FROM python:3.9-slim
 ARG VERSION
 
 RUN apt-get update && \
+    apt-get install apt-utils && \
     apt-get install -y nodejs curl python3-dev build-essential vim sqlite3 && \
+    apt-get remove apt-utils && apt-get autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN pip install setuptools && \

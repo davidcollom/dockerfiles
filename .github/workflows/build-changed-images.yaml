@@ -42,7 +42,7 @@ jobs:
       id: matrix
       run: |
         set -x
-        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z0-9_-]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.all }}' >> images.list
+        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z0-9_-]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.added_modified }}' >> images.list
         echo "List of images:"
         cat images.list
 

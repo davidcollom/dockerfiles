@@ -3,7 +3,7 @@ FROM python:3.9-slim
 ARG VERSION
 
 # Try and fix ENV issues in some of the Base images
-ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 RUN apt-get update && \
     apt-get install apt-utils && \

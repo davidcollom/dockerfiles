@@ -1,14 +1,13 @@
 name: Build Changed Container Images
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-      # - github-actions
   pull_request:
     branches:
       - main
-      # - github-actions
 
 concurrency: ${{ github.workflow }}
 
@@ -20,7 +19,6 @@ jobs:
 
     steps:
     - name: Clean up runner
-      if: ${{ !env.ACT }}
       run: |
         rm -f ~/.ssh/*
         rm -f ~/.gitconfig
@@ -45,7 +43,7 @@ jobs:
       id: matrix
       run: |
         set -x
-        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z]*\/")) | split("/") | .[0]) | sort | unique ] }' <<<'${{ steps.changes.outputs.all }}' >> images.list
+        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.all }}' >> images.list
         echo "List of images:"
         cat images.list
 
@@ -59,3 +57,12 @@ jobs:
     - name: Cancelling for empty matrix
       if: ${{ steps.matrix.outputs.empty == 'true' }}
       uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8
+
+  build-images:
+    needs: generate-matrix
+    strategy:
+      matrix: ${{fromJson( needs.generate-matrix.outputs.matrix )}}
+
+    uses: my-super-sweet-project/shared-workflows/.github/workflows/sample.yaml@main
+    with:
+      image-name: ${{matrix.images}}

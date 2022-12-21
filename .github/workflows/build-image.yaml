@@ -4,7 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       image-name:
+        description: "Image/Dir to build"
+        type: string
         required: true
+
+  workflow_call:
+    inputs:
+      image-name:
+        description: "Image/Dir to build"
+        type: string
+        required: true
+
 
 jobs:
   build_images:
@@ -29,7 +39,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ steps.set_meta.outputs.VERSION }}
+          key: ${{ runner.os }}-buildx-${{ inputs.image-name }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 

@@ -1,14 +1,18 @@
 
-FROM alpine AS BUILDER
+FROM alpine:latest AS BUILDER
+RUN apk add --update --virtual build-deps go git musl-dev libc-dev binutils make
+ENV GOPATH=/go
 
-RUN apk add --update --virtual build-deps go git musl-dev libc-dev binutils 
+ARG VERSION=master
 
-RUN GOOS=linux go get -a -ldflags '-extldflags "-static"' github.com/mdlayher/unifi_exporter/cmd/unifi_exporter && \
-    mv ~/go/bin/unifi_exporter /bin/
+RUN git clone https://github.com/mdlayher/unifi_exporter /app && \
+    cd /app && \
+    go mod init mdlayher/unifi_exporter && \
+    go mod tidy && \
+    go build -mod=mod -o /app/unifi_exporter ./cmd/unifi_exporter
 
-
-FROM alpine
-COPY --from=BUILDER /bin/unifi_exporter /bin/
+FROM alpine:latest
+COPY --from=BUILDER /app/unifi_exporter /bin/
 EXPOSE 9130
 USER nobody
 ENTRYPOINT ["/bin/unifi_exporter"]

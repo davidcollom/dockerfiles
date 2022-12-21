@@ -32,7 +32,7 @@ jobs:
     - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
       name: pulling the branch
       with:
-        fetch-depth: 5
+        fetch-depth: 50
 
     - name: Get Changes
       id: changes
@@ -44,7 +44,7 @@ jobs:
       id: matrix
       run: |
         set -x
-        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.all }}' >> images.list
+        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z0-9_-]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.all }}' >> images.list
         echo "List of images:"
         cat images.list
 

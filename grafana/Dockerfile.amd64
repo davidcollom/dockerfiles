@@ -1,2 +1,0 @@
-ARG version
-FROM carlosedp/monitoring-grafana:${version}

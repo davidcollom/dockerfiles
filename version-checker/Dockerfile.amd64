@@ -1,3 +1,0 @@
-ARG VERSION
-FROM quay.io/jetstack/version-checker:v${VERSION}
-LABEL mantainer="jetstack"

@@ -1,8 +1,0 @@
-pipelines:
-  default:
-    - step:
-        script:
-          - make login build
-
-options:
-  docker: true

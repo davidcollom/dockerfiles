@@ -32,7 +32,7 @@ jobs:
     - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
       name: pulling the branch
       with:
-        fetch-depth: 5
+        fetch-depth: 50
 
     - name: Get Changes
       id: changes
@@ -44,7 +44,7 @@ jobs:
       id: matrix
       run: |
         set -x
-        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.all }}' >> images.list
+        jq -rc '{"images": [ (.[] | select(test("^[a-zA-Z0-9_-]*\/")) | split("/") | .[0])] | sort | unique }' <<<'${{ steps.changes.outputs.all }}' >> images.list
         echo "List of images:"
         cat images.list
 
@@ -60,13 +60,14 @@ jobs:
       uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8
 
   build-images:
-    needs: generate-all-matrix
+    needs: generate-changed-matrix
     strategy:
-      matrix: ${{fromJson( needs.generate-all-matrix.outputs.matrix )}}
+      matrix: ${{fromJson( needs.generate-changed-matrix.outputs.matrix )}}
+      fail-fast: false
     uses: ./.github/workflows/build-image.yaml
     with:
       image-name: ${{matrix.images}}
-      push: false
+      push: ${{ github.event_name == 'push' }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

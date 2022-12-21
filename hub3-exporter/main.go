@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -15,10 +14,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
-	// "github.com/prometheus/common/log"
-	logger "log"
-
+	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 )
 
@@ -35,9 +31,6 @@ var (
 
 	channels   = make(map[int]ChannelInfo)
 	uschannels = make(map[int]ChannelInfo)
-	logbuf     bytes.Buffer
-
-	log = logger.New(&logbuf, "logger: ", logger.Lshortfile)
 )
 
 const (
@@ -87,7 +80,7 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 
 	// Convert from JSONish response to something we can iterate
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
+	body, _ := ioutil.ReadAll(response.Body)
 	var x map[string]interface{}
 	json.Unmarshal([]byte(body), &x)
 	for key, value := range x {
@@ -99,11 +92,12 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 			index, err := strconv.Atoi(oid[len(oid)-1])
 			if err != nil {
 				// Error and quit
+				log.Fatal(err)
 			}
 			// Convert metric to Int
 			metric, err := strconv.Atoi(oid[len(oid)-2])
 			if err != nil {
-				//quit
+				log.Fatal(err)
 			}
 			c := channels[index]
 			if c.ID == 0 {
@@ -140,7 +134,7 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	}
 	// Convert from JSON to something we can iterate
 	defer snr_resp.Body.Close()
-	snrbody, err := ioutil.ReadAll(snr_resp.Body)
+	snrbody, _ := ioutil.ReadAll(snr_resp.Body)
 	var y map[string]interface{}
 	json.Unmarshal([]byte(snrbody), &y)
 	for key, value := range y {
@@ -152,6 +146,7 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 			index, err := strconv.Atoi(oid[len(oid)-1])
 			if err != nil {
 				// Error and quit
+				log.Fatal(err)
 			}
 			c := channels[index]
 			value, _ := strconv.Atoi(value.(string))
@@ -162,9 +157,10 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 
 	up_resp, err := httpClient.Get(fmt.Sprintf("http://%s/walk?oids=1.3.6.1.4.1.4115.1.3.4.1.9.2;", *modemIP))
 	if err != nil {
+		log.Fatal(err)
 	}
 	defer up_resp.Body.Close()
-	upbody, err := ioutil.ReadAll(up_resp.Body)
+	upbody, _ := ioutil.ReadAll(up_resp.Body)
 	var z map[string]interface{}
 	json.Unmarshal([]byte(upbody), &z)
 	for key, value := range z {
@@ -176,11 +172,12 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 			index, err := strconv.Atoi(oid[len(oid)-1])
 			if err != nil {
 				// Error and quit
+				log.Fatal(err)
 			}
 			// Convert metric to Int
 			metric, err := strconv.Atoi(oid[len(oid)-2])
 			if err != nil {
-				//quit
+				log.Fatal(err)
 			}
 			c := uschannels[index]
 			if c.ID == 0 {
@@ -200,11 +197,11 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	usp_resp, err := httpClient.Get(fmt.Sprintf("http://%s/walk?oids=1.3.6.1.4.1.4491.2.1.20.1.2.1.1;", *modemIP))
 	if err != nil {
 		//LOG
-		fmt.Println(err)
+		log.Debug(err)
 	}
 	// Convert from JSON to something we can iterate
 	defer usp_resp.Body.Close()
-	uspbody, err := ioutil.ReadAll(usp_resp.Body)
+	uspbody, _ := ioutil.ReadAll(usp_resp.Body)
 	var w map[string]interface{}
 	json.Unmarshal([]byte(uspbody), &w)
 	for key, value := range w {
@@ -216,6 +213,7 @@ func (p *PrometheusExporter) Collect(ch chan<- prometheus.Metric) {
 			index, err := strconv.Atoi(oid[len(oid)-1])
 			if err != nil {
 				// Error and quit
+				log.Fatal(err)
 			}
 			c := uschannels[index]
 			value, _ := strconv.Atoi(value.(string))

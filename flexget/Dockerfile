@@ -6,9 +6,7 @@ ARG VERSION
 # ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 RUN apt-get update && \
-    apt-get install apt-utils && \
     apt-get install -y nodejs curl python3-dev build-essential vim sqlite3 && \
-    apt-get remove apt-utils && apt-get autoremove && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN pip install setuptools && \

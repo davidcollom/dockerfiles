@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.17.1
 EXPOSE 53 53/udp 953 8053
 
 RUN apk --update add bind bash

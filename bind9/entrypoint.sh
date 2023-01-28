@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #
 # Script options (exit script on command fail).
@@ -32,25 +32,6 @@ echo "  UID prefered:    ${NAMED_UID:=${NAMED_UID_DEFAULT}}"
 echo "  GID prefered:    ${NAMED_GID:=${NAMED_GID_DEFAULT}}"
 echo "  Command:         ${COMMAND}"
 echo
-
-#
-# Change UID / GID of named user.
-#
-echo "Updating UID / GID... "
-if [[ ${NAMED_GID_ACTUAL} -ne ${NAMED_GID} -o ${NAMED_UID_ACTUAL} -ne ${NAMED_UID} ]]
-then
-    echo "change user / group"
-    deluser ${USER}
-    addgroup -g ${NAMED_GID} ${GROUP}
-    adduser -u ${NAMED_UID} -G ${GROUP} -h /etc/bind -g 'Linux User named' -s /sbin/nologin -D ${USER}
-    echo "[DONE]"
-    echo "Set owner and permissions for old uid/gid files"
-    find / -user ${NAMED_UID_ACTUAL} -exec chown ${USER} {} \;
-    find / -group ${NAMED_GID_ACTUAL} -exec chgrp ${GROUP} {} \;
-    echo "[DONE]"
-else
-    echo "[NOTHING DONE]"
-fi
 
 #
 # Set owner and permissions.

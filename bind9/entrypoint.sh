@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #
 # Script options (exit script on command fail).
@@ -56,7 +56,7 @@ fi
 # Set owner and permissions.
 #
 echo "Set owner and permissions... "
-chown -R ${USER}:${GROUP} /var/bind /var/run/named /var/log/named 
+chown -R ${USER}:${GROUP} /var/bind /var/run/named /var/log/named
 chmod -R o-rwx /var/bind /var/run/named /var/log/named
 echo "[DONE]"
 
@@ -65,9 +65,3 @@ echo "[DONE]"
 #
 echo "Start named... "
 exec ${COMMAND}
-
-
-#!/bin/sh
-chown -R named:named /var/cache/bind
-# Run in foreground and log to STDERR (console):
-/usr/sbin/named -c /etc/bind/named.conf -f -u named

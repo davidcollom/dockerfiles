@@ -4,7 +4,7 @@ go 1.19
 
 require github.com/prometheus/common v0.26.0
 
-require github.com/prometheus/client_golang v1.7.1
+require github.com/prometheus/client_golang v1.11.1
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect

@@ -8,7 +8,7 @@ RUN git clone https://github.com/joe-elliott/cert-exporter && \
 
 WORKDIR /cert-exporter
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -installsuffix cgo -o cert-exporter .
+RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o cert-exporter .
 
 
 FROM alpine:latest as output

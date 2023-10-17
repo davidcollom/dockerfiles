@@ -11,7 +11,7 @@ RUN apt-get update && \
 
 RUN pip install setuptools && \
     pip install flexget==$VERSION
-RUN pip install transmission-rpc cfscrape cloudscraper pysocks
+RUN pip install "transmission-rpc>=4.1.4,<5.0.0" cfscrape cloudscraper pysocks
 RUN ln -s /usr/bin/nodejs /usr/bin/node || true
 
 WORKDIR /root/

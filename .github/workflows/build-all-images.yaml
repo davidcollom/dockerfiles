@@ -2,6 +2,9 @@ name: Build ALL Images
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron:  '0 0 1 * *'
+
 
 # ONLY EVER RUN ONE
 concurrency: ${{ github.workflow }}

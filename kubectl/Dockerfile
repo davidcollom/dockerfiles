@@ -1,13 +1,18 @@
-
-
-FROM debian:latest
+FROM debian:stable-slim as builder
 ARG VERSION
 
 RUN apt-get update && \
     apt-get install -y ca-certificates curl jq \
     && apt-get clean && rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-RUN curl -LO /usr/local/bin/kubectl https://dl.k8s.io/release/v${VERSION}/bin/linux/$(uname -m)/kubectl
+WORKDIR /
+COPY install.sh /install.sh
+RUN ./install.sh ${VERSION}
+
+
+FROM debian:stable-slim
+
+COPY --from=builder /kubectl /usr/local/bin/kubectl
 
 USER 1001
 

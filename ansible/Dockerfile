@@ -1,4 +1,5 @@
-FROM ubuntu:24.04
+FROM python:3.12.1-bookworm
+
 ENV ANSIBLE_VERSION 2.9.17
 
 RUN apt-get update; \

@@ -1,11 +1,13 @@
 FROM python:3.12.1-bookworm
 
-ENV ANSIBLE_VERSION 2.9.17
+ENV ANSIBLE_VERSION=9.1.0
 
-RUN apt-get update; \
-    apt-get install -y gcc python3; \
-    apt-get install -y python3-pip; \
-    apt-get clean all
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH ~/.cargo/bin:$PATH
 
 RUN pip3 install "ansible==${ANSIBLE_VERSION}"; \
     pip3 install ansible
+
+VOLUME /root/.ansible
+
+ENTRYPOINT [ "ansible" ]

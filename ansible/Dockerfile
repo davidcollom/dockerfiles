@@ -9,3 +9,9 @@ RUN apk add --no-cache \
 	just \
 	py3-dnspython \
 	py3-passlib
+
+RUN ansible-galaxy collection install ansible.posix
+
+VOLUME /root/.ansible
+
+ENTRYPOINT [ "ansible-playbook" ]

@@ -8,7 +8,8 @@ RUN apk add --no-cache \
 	make \
 	just \
 	py3-dnspython \
-	py3-passlib
+	py3-passlib \
+  kubectl
 
 RUN ansible-galaxy collection install ansible.posix
 

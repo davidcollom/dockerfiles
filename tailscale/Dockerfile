@@ -3,6 +3,6 @@
 # license that can be found in the LICENSE file.
 ARG VERSION
 
-FROM ghcr.io/tailscale/tailscale:$VERSION
+FROM ghcr.io/tailscale/tailscale:${VERSION}
 COPY run.sh /run.sh
 CMD "/run.sh"

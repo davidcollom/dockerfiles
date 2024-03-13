@@ -18,6 +18,6 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
 )

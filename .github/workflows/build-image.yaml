@@ -59,11 +59,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # Needed as part of https://github.com/docker/buildx/issues/495#issuecomment-1043341496
       - name: Set up QEMU
@@ -86,7 +87,7 @@ jobs:
           pull: true
           build-args: VERSION=${{steps.set_meta.outputs.VERSION}}
           platforms: ${{steps.set_meta.outputs.PLATFORMS}}
-          tags:  ${{ secrets.DOCKERHUB_USERNAME }}/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
+          tags:  ghcr.io/davidcollom/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 

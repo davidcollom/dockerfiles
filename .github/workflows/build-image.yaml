@@ -95,7 +95,7 @@ jobs:
           platforms: ${{steps.set_meta.outputs.PLATFORMS}}
           tags: |
             ghcr.io/davidcollom/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
-            {{ secrets.DOCKERHUB_USERNAME }}/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 

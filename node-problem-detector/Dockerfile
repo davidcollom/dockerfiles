@@ -13,7 +13,7 @@
 # limitations under the License.
 ARG BASEIMAGE=registry.k8s.io/build-image/debian-base:bullseye-v1.4.3
 
-FROM golang:1.20.0 as builder
+FROM golang:1.21 as builder
 LABEL maintainer="Andy Xie <andy.xning@gmail.com>"
 
 ENV GOPATH /gopath/

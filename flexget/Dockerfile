@@ -1,13 +1,14 @@
-FROM python:3.12-slim
+#syntax=docker/dockerfile:1
+FROM python:3.12.3-bookworm
 
 ARG VERSION
-
-# Try and fix ENV issues in some of the Base images
-# ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
 RUN apt-get update && \
     apt-get install -y nodejs curl python3-dev build-essential vim sqlite3 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Deps for arm32 - Run on all arch's doesn't make any differencegit
+RUN curl -Lo /tmp/pendulum-3.0.0-py3-none-any.whl https://github.com/Flexget/Flexget/files/13787215/pendulum-3.0.0-py3-none-any.whl.zip && \
+    pip install /tmp/pendulum-3.0.0-py3-none-any.whl
 
 RUN pip install setuptools && \
     pip install flexget==$VERSION

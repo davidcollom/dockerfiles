@@ -1,3 +1,5 @@
+#syntax=docker/dockerfile:1
+
 # Copyright 2016 The Kubernetes Authors All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +32,23 @@ RUN git clone https://github.com/kubernetes/node-problem-detector.git /gopath/sr
 WORKDIR /gopath/src/k8s.io/node-problem-detector
 
 RUN git checkout ${VERSION};
-RUN make bin/node-problem-detector bin/health-checker bin/log-counter
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
+      -o bin/node-problem-detector \
+      -ldflags '-X k8s.io/node-problem-detector/pkg/version.version=v0.8.18' \
+      -tags "journald " \
+      ./cmd/nodeproblemdetector
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
+      -o bin/health-checker \
+      -ldflags '-X k8s.io/node-problem-detector/pkg/version.version=v0.8.18' \
+      -tags "journald " \
+      cmd/healthchecker/health_checker.go
+
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
+    -o bin/log-counter \
+    -ldflags '-X k8s.io/node-problem-detector/pkg/version.version=v0.8.18' \
+    -tags "journald " \
+    cmd/logcounter/log_counter.go
+
 
 ARG BASEIMAGE
 FROM ${BASEIMAGE}

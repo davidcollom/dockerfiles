@@ -53,7 +53,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
 ARG BASEIMAGE
 FROM ${BASEIMAGE}
 
-RUN clean-install util-linux bash libsystemd-dev
+RUN clean-install util-linux bash libsystemd-dev libc6
 
 # Avoid symlink of /etc/localtime.
 RUN test -h /etc/localtime && rm -f /etc/localtime && cp /usr/share/zoneinfo/UTC /etc/localtime || true

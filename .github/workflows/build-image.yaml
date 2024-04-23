@@ -65,12 +65,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }} 
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # Needed as part of https://github.com/docker/buildx/issues/495#issuecomment-1043341496
       - name: Set up QEMU
@@ -81,12 +81,12 @@ jobs:
           platforms: all
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           platforms: ${{steps.set_meta.outputs.PLATFORMS}}
 
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: "${{inputs.image-name}}/"
           push: ${{inputs.push}}
@@ -96,8 +96,8 @@ jobs:
           tags: |
             ghcr.io/davidcollom/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Move cache
         run: |

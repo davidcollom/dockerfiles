@@ -12,7 +12,7 @@ RUN curl -Lo /tmp/pendulum-3.0.0-py3-none-any.whl https://github.com/Flexget/Fle
 
 RUN pip install setuptools && \
     pip install flexget==$VERSION
-RUN pip install "transmission-rpc>=4.1.4,<5.0.0" cfscrape cloudscraper pysocks
+RUN pip install "transmission-rpc>=7.0.3,<8.0.0" cfscrape cloudscraper pysocks
 RUN ln -s /usr/bin/nodejs /usr/bin/node || true
 
 WORKDIR /root/

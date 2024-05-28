@@ -58,7 +58,7 @@ jobs:
 
     - name: Cancelling for empty matrix
       if: ${{ steps.matrix.outputs.empty == 'true' }}
-      uses: andymckay/cancel-action@8f8510d9dea52fcc8eb6ca10d6ce47fd5fc43cd8
+      uses: andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a
 
   build-images:
     needs: generate-all-matrix

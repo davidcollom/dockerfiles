@@ -16,18 +16,7 @@ jobs:
       matrix: ${{ steps.matrix.outputs.matrix }}
 
     steps:
-    - name: Clean up runner
-      if: ${{ !env.ACT }}
-      run: |
-        rm -f ~/.ssh/*
-        rm -f ~/.gitconfig
-      continue-on-error: true
-
-    - name: Clean Workspace
-      if: ${{ !env.ACT }}
-      uses: AutoModality/action-clean@11d611e7824ef8f2fe7f05a117d1ffe4c1a090f0 # v1.1.1
-
-    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+    - uses: actions/checkout@v4
       # if: ${{ !env.ACT }}
       name: pulling the branch
       with:

@@ -5,9 +5,8 @@ ENV GOPATH=/go
 
 ARG VERSION=master
 
-RUN git clone https://github.com/mdlayher/unifi_exporter /app && \
+RUN git clone https://github.com/adriansaul/unifi_exporter /app && \
     cd /app && \
-    go mod init mdlayher/unifi_exporter && \
     go mod tidy && \
     go build -mod=mod -o /app/unifi_exporter ./cmd/unifi_exporter
 

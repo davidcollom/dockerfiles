@@ -25,7 +25,7 @@ jobs:
 
     - name: Clean Workspace
       if: ${{ !env.ACT }}
-      uses: AutoModality/action-clean@d004b47eb728f2a83316fc70ba9a62ef97278013 # v1.1.0
+      uses: AutoModality/action-clean@11d611e7824ef8f2fe7f05a117d1ffe4c1a090f0 # v1.1.1
 
     - uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
       # if: ${{ !env.ACT }}

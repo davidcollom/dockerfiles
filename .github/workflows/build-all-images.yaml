@@ -17,16 +17,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      # if: ${{ !env.ACT }}
       name: pulling the branch
       with:
         fetch-depth: 1
 
     - name: List Dockerfiles
-      uses: tj-actions/glob@v16
+      uses: tj-actions/glob@v22
       id: list-dockerfiles
       with:
-        strip-top-level-dir: true
+        strip-top-level-dir: "true"
         files: |
           **/Dockerfile
 

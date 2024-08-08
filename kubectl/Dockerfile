@@ -12,9 +12,9 @@ RUN ./install.sh ${VERSION}
 
 FROM debian:stable-slim
 
-COPY --from=builder /kubectl /usr/local/bin/kubectl
+COPY --chown=1001:1001 --from=builder /kubectl /usr/local/bin/kubectl
 
 USER 1001
 
-ENTRYPOINT ["kubectl"]
+ENTRYPOINT ["/usr/local/bin/kubectl"]
 CMD ["--help"]

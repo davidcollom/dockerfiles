@@ -1,20 +1,5 @@
-FROM debian:stable-slim as builder
 ARG VERSION
+FROM rancher/k3s-upgrade:v$VERSION-k3s1
 
-RUN apt-get update && \
-    apt-get install -y ca-certificates curl jq \
-    && apt-get clean && rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-WORKDIR /
-COPY install.sh /install.sh
-RUN ./install.sh ${VERSION}
-
-
-FROM debian:stable-slim
-
-COPY --chown=1001:1001 --from=builder /kubectl /usr/local/bin/kubectl
-
-USER 1001
-
-ENTRYPOINT ["/usr/local/bin/kubectl"]
+ENTRYPOINT ["/opt/k3s","kubectl"]
 CMD ["--help"]

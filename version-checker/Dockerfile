@@ -1,4 +1,4 @@
-FROM golang:1.14-buster as builder
+FROM --platform=${TARGETPLATFORM} golang:1.14-buster as builder
 ARG VERSION
 RUN git clone https://github.com/jetstack/version-checker.git
 WORKDIR /go/version-checker
@@ -9,7 +9,7 @@ RUN mkdir -p ./bin/ && \
 
 
 # Actually build image.
-FROM alpine:3.12
+FROM --platform=${TARGETPLATFORM} alpine:3.12
 
 RUN apk --no-cache add ca-certificates
 

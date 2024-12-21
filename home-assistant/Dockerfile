@@ -1,5 +1,5 @@
 ARG VERSION
-FROM homeassistant/home-assistant:${VERSION}
+FROM --platform=${TARGETPLATFORM} homeassistant/home-assistant:${VERSION}
 
 RUN <<-EOS
 cat > /etc/apk/repositories << EOF; echo

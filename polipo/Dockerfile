@@ -1,4 +1,4 @@
-FROM alpine:latest AS builder
+FROM --platform=${TARGETPLATFORM} alpine:latest AS builder
 
 ARG VERSION=1.1.1
 
@@ -10,7 +10,7 @@ RUN apk update && \
     make all && \
     make install
 
-FROM alpine:latest
+FROM --platform=${TARGETPLATFORM} alpine:latest
 
 COPY --from=builder /tmp/polipo/polipo /usr/local/sbin/polipo
 COPY --from=builder /tmp/polipo/config.sample /etc/polipo/config

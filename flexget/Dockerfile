@@ -1,5 +1,5 @@
 #syntax=docker/dockerfile:1
-FROM python:3.12.3-bookworm
+FROM  --platform=${TARGETPLATFORM} python:3.12.3-bookworm
 
 ARG VERSION
 RUN apt-get update && \

@@ -1,4 +1,4 @@
-FROM alpine:3.11.3
+FROM  --platform=${TARGETPLATFORM} alpine:3.11.3
 EXPOSE 53 53/udp 953 8053
 
 RUN apk --update add bind bash

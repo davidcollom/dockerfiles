@@ -15,7 +15,7 @@
 # limitations under the License.
 ARG BASEIMAGE=registry.k8s.io/build-image/debian-base:bullseye-v1.4.3
 
-FROM golang:1.21 as builder
+FROM --platform=${TARGETPLATFORM} golang:1.21 as builder
 LABEL maintainer="Andy Xie <andy.xning@gmail.com>"
 
 ENV GOPATH /gopath/
@@ -51,7 +51,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
 
 
 ARG BASEIMAGE
-FROM ${BASEIMAGE}
+FROM --platform=${TARGETPLATFORM} ${BASEIMAGE}
 
 RUN clean-install util-linux bash libsystemd-dev libc6
 

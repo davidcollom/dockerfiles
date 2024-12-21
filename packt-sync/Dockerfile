@@ -1,5 +1,5 @@
 ARG VERSION
-FROM alpine:latest
+FROM --platform=${TARGETPLATFORM} alpine:latest
 
 RUN apk add --no-cache --update perl perl-libwww perl-io-socket-ssl perl-uri perl-json perl-pathtools perl-log-log4perl make \
     && \

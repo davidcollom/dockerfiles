@@ -1,4 +1,4 @@
-FROM golang:1.20.0 as builder
+FROM  --platform=${TARGETPLATFORM} golang:1.20.0 as builder
 ENV GOPATH /go/
 ENV PATH $GOPATH/bin:$PATH
 
@@ -16,7 +16,7 @@ RUN CGO_ENABLED=0 \
     -ldflags "-X github.com/m-lab/go/prometheusx.GitShortCommit=$(git log -1 --format=%h) -w -s" \
     ./cmd/github_receiver
 
-FROM gcr.io/distroless/static
+FROM  --platform=${TARGETPLATFORM} gcr.io/distroless/static
 
 COPY --from=builder /go/src/github.com/m-lab/alertmanager-github-receiver/github_receiver ./
 ENTRYPOINT ["/github_receiver"]

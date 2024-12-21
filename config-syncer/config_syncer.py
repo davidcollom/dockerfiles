@@ -1,5 +1,6 @@
 import kopf
 import kubernetes
+import logging
 
 @kopf.on.startup()
 def configure(settings: kopf.OperatorSettings, **_):

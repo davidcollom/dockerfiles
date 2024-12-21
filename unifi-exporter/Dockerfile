@@ -1,6 +1,6 @@
 
-FROM alpine:latest AS BUILDER
-RUN --platform=${TARGETPLATFORM} apk add --update --virtual build-deps go git musl-dev libc-dev binutils make
+FROM --platform=${TARGETPLATFORM} alpine:latest AS BUILDER
+RUN apk add --update --virtual build-deps go git musl-dev libc-dev binutils make
 ENV GOPATH=/go
 
 ARG VERSION=master

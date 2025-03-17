@@ -1,0 +1,89 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "VMHub5 Exporter Dashboard",
+    "tags": ["vmhub5", "exporter"],
+    "timezone": "browser",
+    "schemaVersion": 30,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "IPv4 Lease and Expiry Times",
+        "targets": [
+          {"expr": "provisioning_ipv4_lease_time", "legendFormat": "Lease Time", "refId": "A"},
+          {"expr": "provisioning_ipv4_expire_time", "legendFormat": "Expire Time", "refId": "B"}
+        ],
+        "xaxis": {"mode": "time"},
+        "yaxes": [{"format": "s", "label": "Seconds"}, {"format": "s"}]
+      },
+      {
+        "type": "graph",
+        "title": "IPv6 Lease and Expiry Times",
+        "targets": [
+          {"expr": "provisioning_ipv6_lease_time", "legendFormat": "Lease Time", "refId": "A"},
+          {"expr": "provisioning_ipv6_expire_time", "legendFormat": "Expire Time", "refId": "B"}
+        ],
+        "xaxis": {"mode": "time"},
+        "yaxes": [{"format": "s", "label": "Seconds"}, {"format": "s"}]
+      },
+      {
+        "type": "stat",
+        "title": "DSLite Status",
+        "targets": [
+          {"expr": "provisioning_dsLite_enable", "refId": "A"}
+        ],
+        "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": 1}, {"color": "red", "value": 0}]}}}
+      },
+      {
+        "type": "graph",
+        "title": "PON Uptime",
+        "targets": [
+          {"expr": "pon_status_up_time", "legendFormat": "Uptime", "refId": "A"}
+        ],
+        "xaxis": {"mode": "time"},
+        "yaxes": [{"format": "s", "label": "Seconds"}, {"format": "s"}]
+      },
+      {
+        "type": "stat",
+        "title": "PON Access Allowed",
+        "targets": [
+          {"expr": "pon_status_access_allowed", "refId": "A"}
+        ],
+        "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": 1}, {"color": "red", "value": 0}]}}}
+      },
+      {
+        "type": "stat",
+        "title": "Firewall Status",
+        "targets": [
+          {"expr": "pon_status_firewall", "refId": "A"}
+        ],
+        "fieldConfig": {"defaults": {"thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": 1}, {"color": "red", "value": 0}]}}}
+      },
+      {
+        "type": "graph",
+        "title": "Transceiver Metrics",
+        "targets": [
+          {"expr": "pon_interface_transceiver_temp", "legendFormat": "Temperature", "refId": "A"},
+          {"expr": "pon_interface_transceiver_voltage", "legendFormat": "Voltage", "refId": "B"},
+          {"expr": "pon_interface_laser_bias_current", "legendFormat": "Laser Bias Current", "refId": "C"}
+        ],
+        "xaxis": {"mode": "time"},
+        "yaxes": [{"format": "short", "label": "Values"}, {"format": "short"}]
+      },
+      {
+        "type": "graph",
+        "title": "Optical Levels",
+        "targets": [
+          {"expr": "pon_interface_transmit_optical_level", "legendFormat": "Transmit Optical Level", "refId": "A"},
+          {"expr": "pon_interface_optical_signal_level", "legendFormat": "Optical Signal Level", "refId": "B"}
+        ],
+        "xaxis": {"mode": "time"},
+        "yaxes": [{"format": "short", "label": "Levels"}, {"format": "short"}]
+      }
+    ]
+  },
+  "overwrite": true
+}

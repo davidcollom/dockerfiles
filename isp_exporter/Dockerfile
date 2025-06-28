@@ -1,13 +1,21 @@
-FROM python:3.6-alpine
+# Build stage
+FROM golang:1.24-alpine AS builder
 
-RUN mkdir -p               /opt/isp_exporter
-ADD isp_exporter.py  /opt/isp_exporter
-ADD requirements.txt       /opt/isp_exporter
+WORKDIR /app
 
-RUN \
-     pip3 install -r /opt/isp_exporter/requirements.txt
+COPY go.mod go.sum ./
+RUN go mod download
 
-USER       nobody
-EXPOSE     9353/tcp
-WORKDIR    /opt/isp_exporter
-ENTRYPOINT [ "python3", "isp_exporter.py" ]
+COPY . .
+
+# Build the Go binary statically
+RUN CGO_ENABLED=0 go build -o isp_exporter main.go
+
+# Final minimal image
+FROM gcr.io/distroless/static-debian11
+
+COPY --from=builder /app/isp_exporter /isp_exporter
+
+EXPOSE 9353
+
+ENTRYPOINT ["/isp_exporter"]

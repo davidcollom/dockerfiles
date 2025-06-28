@@ -9,7 +9,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary statically
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o speedtest_exporter main.go
+RUN CGO_ENABLED=0 go build -o speedtest_exporter main.go
 
 # Final minimal image
 FROM gcr.io/distroless/static-debian11

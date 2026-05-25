@@ -2,4 +2,4 @@ requests==2.32.5
 prometheus_client==0.24.1
 crontab==1.0.5
 retry==0.9.2
-kubernetes==35.0.0
+kubernetes==36.0.0

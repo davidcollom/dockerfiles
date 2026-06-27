@@ -1,11 +1,11 @@
-FROM golang:1.22 AS build
+FROM golang:1.26 AS build
 
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -o /stuck-pod-reaper ./cmd/stuck-pod-reaper
+RUN CGO_ENABLED=0 go build -o /stuck-pod-reaper ./cmd/
 
 FROM gcr.io/distroless/static-debian12:nonroot
 

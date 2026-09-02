@@ -1,6 +1,6 @@
 # packt-sync
 
-A small Perl utility that authenticates to Packt, enumerates the books entitled to an account, and downloads missing formats into one directory per title. I containerized it to run the same repeatable library-sync job on a schedule without maintaining Perl modules on the host.
+A small Go utility that authenticates to Packt, enumerates the books entitled to an account, and concurrently downloads missing formats into one directory per title.
 
 | Environment variable | Default | Purpose |
 | --- | --- | --- |
@@ -8,12 +8,13 @@ A small Perl utility that authenticates to Packt, enumerates the books entitled 
 | `PASSWORD` | none | Packt account password |
 | `DOWNLOAD_PATH` | working directory | Library destination |
 | `EXTENSIONS` | `epub,mobi,pdf` | Comma-separated formats |
-| `LOG_LEVEL` | `INFO` | Perl Log4perl level |
+| `DOWNLOAD_CONCURRENCY` | `4` | Maximum simultaneous downloads |
+| `LOG_LEVEL` | `INFO` | Set to `DEBUG` for verbose logging |
 
 ```sh
 docker run --rm -e USERNAME -e PASSWORD \
   -v "$PWD/books:/books" -e DOWNLOAD_PATH=/books \
-  davidcollom/packt-sync:0.0.2
+  davidcollom/packt-sync:0.1.0
 ```
 
-The script uses Packt's service APIs, which may change independently. Supply credentials through a secret manager and ensure your downloading complies with the account terms.
+Downloads are streamed to temporary files and atomically renamed once complete. The utility uses Packt's service APIs, which may change independently. Supply credentials through a secret manager and ensure your downloading complies with the account terms.

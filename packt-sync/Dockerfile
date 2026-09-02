@@ -1,14 +1,19 @@
-ARG VERSION
-FROM --platform=${TARGETPLATFORM} alpine:latest
+FROM --platform=${BUILDPLATFORM} golang:1.26-alpine AS builder
 
-RUN apk add --no-cache --update perl perl-libwww perl-io-socket-ssl perl-uri perl-json perl-pathtools perl-log-log4perl make \
-    && \
-    rm -rf /var/cache/apk/*
+ARG TARGETOS
+ARG TARGETARCH
 
-# RUN cpanm -in URI::Escape LWP LWP::Protocol::https JSON Cwd Log::Log4perl
+WORKDIR /src
+COPY go.mod ./
+COPY main.go ./
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-$(go env GOARCH)} go build -trimpath -ldflags="-s -w" -o /packt-sync .
 
-COPY packt-sync.pl /packt-sync.pl
+FROM alpine:3.23
+
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /packt-sync /bin/packt-sync
 
 ENV EXTENSIONS=epub,mobi,pdf
+ENV DOWNLOAD_CONCURRENCY=4
 
-ENTRYPOINT ["/packt-sync.pl"]
+ENTRYPOINT ["/bin/packt-sync"]

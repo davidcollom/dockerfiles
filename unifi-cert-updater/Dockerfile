@@ -1,4 +1,5 @@
-FROM --platform=${TARGETPLATFORM} golang:1.24-alpine AS builder
+ARG TARGETPLATFORM
+FROM --platform=${TARGETPLATFORM} golang:1.25-alpine AS builder
 ARG VERSION
 
 WORKDIR /go/unifi-cert-updater

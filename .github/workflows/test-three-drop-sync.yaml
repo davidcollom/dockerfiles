@@ -1,0 +1,40 @@
+name: Test three-drop-sync
+
+on:
+  pull_request:
+    paths:
+      - 'three-drop-sync/**'
+      - '.github/workflows/test-three-drop-sync.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'three-drop-sync/**'
+      - '.github/workflows/test-three-drop-sync.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: three-drop-sync
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: three-drop-sync/go.mod
+          cache: false
+      - name: Format, test and vet
+        run: |
+          test -z "$(gofmt -l .)"
+          go test -race -cover ./...
+          go vet ./...
+      - name: Build for NAS and Kubernetes nodes
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /tmp/three-drop-sync-amd64 .
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o /tmp/three-drop-sync-arm64 .
+      - name: Test browser hand-off helper with synthetic fixtures
+        run: node --test agents/browser-export.test.js

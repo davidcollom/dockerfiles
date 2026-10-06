@@ -45,6 +45,7 @@ These are personal operational images, not guaranteed drop-in replacements for t
 | [stuck-pod-reaper](stuck-pod-reaper/) | Local Go project | Detects, and optionally deletes, old controller-owned Kubernetes pods stuck starting. |
 | [system-upgrade-os-patch](system-upgrade-os-patch/) | Local Go project | Returns a calendar-derived version redirect for system-upgrade orchestration. |
 | [tailscale](tailscale/) | Customized upstream | Adds Kubernetes state storage, userspace networking, routes, and optional DNAT startup logic. |
+| [three-drop-sync](three-drop-sync/) | Local Go project | Experimental NAS archive of 3Drop likes/collections with concurrent model downloads; account integration is pending verification. |
 | [transmission](transmission/) | Customized service | Transmission daemon with persistent configuration, environment overrides, UID/GID mapping, and blocklists. |
 | [unifi-cert-updater](unifi-cert-updater/) | Local Go project | Copies a Kubernetes TLS Secret into UniFi OS, activates it, and prunes old certificates. |
 | [unifi-exporter](unifi-exporter/) | Upstream rebuild | Builds an upstream UniFi Prometheus exporter for multiple architectures. |

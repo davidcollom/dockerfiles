@@ -83,7 +83,7 @@ func newCommand() *cobra.Command {
 		Use: "three-drop-sync", Short: "Back up 3Drop references and supported model files",
 		SilenceUsage: true, SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return fmt.Errorf("choose a command: sync, import or download")
+			return fmt.Errorf("choose a command: sync, import, handoff, drive or download")
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if configFile != "" {
@@ -206,6 +206,7 @@ func newCommand() *cobra.Command {
 		return err
 	}
 	root.AddCommand(download)
+	addHandoffCommands(root, cfg)
 	return root
 }
 

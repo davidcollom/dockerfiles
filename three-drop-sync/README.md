@@ -4,11 +4,41 @@ A Go service for backing up 3Drop likes and collections to a mounted NAS, with
 bounded concurrent model downloads. It uses Cobra for the CLI and Viper for
 configuration.
 
-**Experimental:** authenticated 3Drop account access has not yet been verified.
+**Experimental:** signed-in 3Drop pages were verified, but the private account API
+and a complete browser export have not yet been verified.
 Automatic file discovery currently targets free Printables models; other source
 sites remain reference-only. A generated Printables download link was verified,
 but fetching its file returned HTTP 403 in the research environment. This is not
 yet a verified complete backup of a real account.
+
+## Google Drive hand-off
+
+The browser can keep its 3Drop session and export a complete JSON inventory to
+Google Drive. The NAS consumes that inventory using independent Drive OAuth
+credentials, then downloads supported files locally. Partial, inconsistent, stale
+and older inventories are rejected; titles, source URLs and collection membership
+are retained. JSON is canonical; CSV and Google Sheets input are not supported.
+
+```sh
+# Validate the browser's complete reference inventory first.
+three-drop-sync handoff --handoff-file catalogue.json --dry-run --download
+
+# First publication prints a stable Drive file ID; supply it on later updates.
+three-drop-sync drive publish --handoff-file catalogue.json \
+  --drive-credentials-file /private/drive-publisher.json
+
+# Pull on the NAS and resolve fresh provider download links locally.
+three-drop-sync drive sync --drive-file-id YOUR_FILE_ID \
+  --drive-credentials-file /private/drive-reader.json \
+  --output /mnt/nas/3drop --download --workers 4 --max-files 50 \
+  --max-file-size 1GiB --interval 6h
+```
+
+See [the Drive setup and manifest contract](docs/google-drive-handoff.md),
+[browser agent runbook](agents/README.md) and
+[Drive Compose example](examples/compose-drive.yaml). The CLI and synthetic tests
+are implemented; live Drive publication and complete browser export remain
+unverified. No scheduled browser task or live NAS deployment has been configured.
 
 ## Commands
 

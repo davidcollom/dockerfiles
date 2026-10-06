@@ -36,3 +36,5 @@ jobs:
         run: |
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /tmp/three-drop-sync-amd64 .
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o /tmp/three-drop-sync-arm64 .
+      - name: Test browser hand-off helper with synthetic fixtures
+        run: node --test agents/browser-export.test.js

@@ -1,8 +1,11 @@
 # OpenCode
 
 The official OpenCode v2 image with Git, SSH client, Bash, curl, jq, ripgrep,
-Python, Node.js and npm for a persistent coding workspace. Runs as UID/GID 1000.
-The upstream version comes from `VERSION`; `PLATFORMS` follows the shared build workflow.
+Python, Node.js, npm, GitHub CLI, Docker CLI and Buildx for a persistent coding workspace. Runs as UID/GID 1000.
+The upstream OpenCode tag is pinned in `UPSTREAM_VERSION` in the Dockerfile;
+`VERSION` identifies this derived image. `PLATFORMS` follows the shared build workflow.
+Docker tooling is client-only: no Docker daemon, host socket, or cluster credentials
+are included. A separately isolated builder is required for container builds.
 
 ## Manual build while GitHub Actions is unavailable
 

@@ -12,6 +12,14 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/three-drop-sync"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "/three-drop-sync"
+    schedule:
+      interval: "weekly"
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:

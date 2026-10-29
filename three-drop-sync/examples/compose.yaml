@@ -1,0 +1,27 @@
+services:
+  three-drop-sync:
+    image: ghcr.io/davidcollom/three-drop-sync:0.1.0
+    build:
+      context: ..
+    user: "${PUID:-10001}:${PGID:-10001}"
+    command:
+      - sync
+      - --cookie-file=/run/secrets/three_drop_cookie
+      - --output=/library
+      - --interval=24h
+      - --download
+      - --workers=4
+      - --max-files=50
+      - --max-file-size=1GiB
+    restart: "on-failure:3"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - "${LIBRARY_PATH:?Set LIBRARY_PATH to your mounted NAS directory}:/library"
+    secrets:
+      - three_drop_cookie
+
+secrets:
+  three_drop_cookie:
+    file: "${COOKIE_FILE:?Set COOKIE_FILE to your local private session file}"

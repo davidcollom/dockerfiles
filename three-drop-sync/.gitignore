@@ -1,0 +1,4 @@
+/secrets/
+/library/
+*.cookie
+/three-drop-sync

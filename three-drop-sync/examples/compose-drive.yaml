@@ -1,0 +1,30 @@
+services:
+  three-drop-sync:
+    image: ghcr.io/davidcollom/three-drop-sync:0.1.0
+    build:
+      context: ..
+    user: "${PUID:-10001}:${PGID:-10001}"
+    command:
+      - drive
+      - sync
+      - "--drive-file-id=${DRIVE_FILE_ID:?Set DRIVE_FILE_ID to the catalogue JSON file ID}"
+      - --drive-credentials-file=/run/secrets/drive_oauth
+      - --output=/library
+      - --interval=6h
+      - --max-manifest-age=168h
+      - --download
+      - --workers=4
+      - --max-files=50
+      - --max-file-size=1GiB
+    restart: "on-failure:3"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - "${LIBRARY_PATH:?Set LIBRARY_PATH to your mounted NAS directory}:/library"
+    secrets:
+      - drive_oauth
+
+secrets:
+  drive_oauth:
+    file: "${DRIVE_CREDENTIALS_FILE:?Set DRIVE_CREDENTIALS_FILE to private OAuth JSON}"

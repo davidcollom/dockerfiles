@@ -31,6 +31,12 @@ on:
       DOCKERHUB_TOKEN:
         required: true
         description: Docker hub Token
+      GHCR_USERNAME:
+        required: false
+        description: "GHCR user (defaults to the repository owner)"
+      GHCR_TOKEN:
+        required: false
+        description: "GitHub token with write:packages (defaults to GITHUB_TOKEN)"
 
 permissions:
   contents: read

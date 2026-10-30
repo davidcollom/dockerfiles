@@ -86,9 +86,20 @@ reused across restarts instead of being fetched again.
 The repository's `Build Image` workflow publishes this image to Docker Hub and
 GHCR. The two registries are pushed in separate steps, so a registry
 authentication failure in one of them cannot stop the other from receiving the
-image. Pushing to GHCR with the workflow's `GITHUB_TOKEN` requires the
-`ghcr.io/davidcollom/opencode` package to be linked to the `davidcollom/dockerfiles`
-repository; until it is, only the Docker Hub push succeeds.
+image.
+
+Pushing to GHCR needs credentials that can write to the
+`ghcr.io/davidcollom/opencode` package. The workflow's `GITHUB_TOKEN` only
+works when that package is linked to the `davidcollom/dockerfiles` repository
+with write access; the package link alone has been observed to leave the
+registry rejecting the push with `permission_denied: read_package`. To make the
+GHCR push independent of that, add a repository secret:
+
+- `GHCR_TOKEN` - a classic personal access token for `davidcollom` with the
+  `write:packages` scope. When it is set the workflow uses it instead of
+  `GITHUB_TOKEN`.
+- `GHCR_USERNAME` - optional, defaults to the repository owner
+  (`davidcollom`).
 
 To build and push by hand instead, from the Dockerfiles repository root:
 

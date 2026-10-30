@@ -6,3 +6,6 @@ hub3-exporter/hub3-*
 *.pem
 *.crt
 .env
+
+# OpenCode plugin runtime state
+.opencode/

@@ -81,9 +81,16 @@ the reference.
 References live on the volume mounted at `/home/opencode`, so the clone is
 reused across restarts instead of being fetched again.
 
-## Manual build while GitHub Actions is unavailable
+## Building
 
-From the Dockerfiles repository root:
+The repository's `Build Image` workflow publishes this image to Docker Hub and
+GHCR. The two registries are pushed in separate steps, so a registry
+authentication failure in one of them cannot stop the other from receiving the
+image. Pushing to GHCR with the workflow's `GITHUB_TOKEN` requires the
+`ghcr.io/davidcollom/opencode` package to be linked to the `davidcollom/dockerfiles`
+repository; until it is, only the Docker Hub push succeeds.
+
+To build and push by hand instead, from the Dockerfiles repository root:
 
 ```sh
 version=$(cat opencode/VERSION)

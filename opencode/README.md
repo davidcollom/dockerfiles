@@ -36,12 +36,12 @@ inside OpenCode:
 ```
 
 The command runs the bundled `opencode-checkout` helper, which clones the
-repository over HTTPS into the workspace (`/workspace`, or `$OPENCODE_WORKSPACE`
-when set) and prints the absolute path of the checkout. Private repositories are
-cloned with the Git credentials configured in the container, for example a
-GitHub App credential helper or `gh auth setup-git`. An existing checkout is
-refreshed rather than cloned again, and a checkout that belongs to a different
-repository is refused instead of being overwritten.
+repository over HTTPS into the workspace at `/workspace/github/<owner>/<repo>`
+(or `$OPENCODE_CHECKOUT_ROOT` when set) and prints the absolute path of the
+checkout. Private repositories are cloned with the Git credentials configured in
+the container, for example a GitHub App credential helper or `gh auth setup-git`.
+An existing checkout is refreshed rather than cloned again, and a checkout that
+belongs to a different repository is refused instead of being overwritten.
 
 The helper is also usable directly:
 

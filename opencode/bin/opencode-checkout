@@ -3,13 +3,18 @@
 #
 # Usage: opencode-checkout <owner/repo> [branch]
 #
+# The checkout is placed at <root>/<owner>/<repo>. The root defaults to
+# /workspace/github and can be overridden with OPENCODE_CHECKOUT_ROOT, so the
+# layout matches the rest of the workspace and repositories with the same name
+# from different owners cannot collide.
+#
 # The repository is cloned over HTTPS so any Git credential helper configured
-# for the container (for example a GitHub App or `gh auth setup-git`) supplies
-# credentials for private repositories. The absolute path of the checkout is
-# written to stdout; progress and errors go to stderr.
+# for the container (a GitHub App or `gh auth setup-git`) supplies credentials
+# for private repositories. The absolute path of the checkout is written to
+# stdout; progress and errors go to stderr.
 set -eu
 
-workspace="${OPENCODE_WORKSPACE:-/workspace}"
+root="${OPENCODE_CHECKOUT_ROOT:-/workspace/github}"
 
 usage() {
   echo "usage: opencode-checkout <owner/repo> [branch]" >&2
@@ -51,7 +56,7 @@ case "${owner}${name}" in
     ;;
 esac
 
-target="$workspace/$name"
+target="$root/$owner/$name"
 url="https://github.com/$owner/$name"
 
 if [ -e "$target" ]; then
@@ -78,7 +83,7 @@ if [ -e "$target" ]; then
   exit 0
 fi
 
-mkdir -p "$workspace"
+mkdir -p "$root"
 if [ -n "$branch" ]; then
   git clone --branch "$branch" "$url" "$target"
 else

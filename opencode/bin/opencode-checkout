@@ -1,0 +1,87 @@
+#!/bin/sh
+# Create or refresh a GitHub checkout inside the OpenCode workspace.
+#
+# Usage: opencode-checkout <owner/repo> [branch]
+#
+# The repository is cloned over HTTPS so any Git credential helper configured
+# for the container (for example a GitHub App or `gh auth setup-git`) supplies
+# credentials for private repositories. The absolute path of the checkout is
+# written to stdout; progress and errors go to stderr.
+set -eu
+
+workspace="${OPENCODE_WORKSPACE:-/workspace}"
+
+usage() {
+  echo "usage: opencode-checkout <owner/repo> [branch]" >&2
+  exit 2
+}
+
+[ "$#" -ge 1 ] || usage
+
+spec="$1"
+branch="${2:-}"
+
+# Accept owner/repo as well as the usual GitHub HTTPS and SSH remotes.
+case "$spec" in
+  https://github.com/*) spec="${spec#https://github.com/}" ;;
+  http://github.com/*) spec="${spec#http://github.com/}" ;;
+  git@github.com:*) spec="${spec#git@github.com:}" ;;
+  ssh://git@github.com/*) spec="${spec#ssh://git@github.com/}" ;;
+esac
+spec="${spec%.git}"
+spec="${spec#/}"
+spec="${spec%/}"
+
+case "$spec" in
+  */*/*)
+    echo "opencode-checkout: expected <owner>/<repo>, got '$spec'" >&2
+    exit 2
+    ;;
+  */*) ;;
+  *) usage ;;
+esac
+
+owner="${spec%%/*}"
+name="${spec#*/}"
+
+case "${owner}${name}" in
+  *[!A-Za-z0-9._-]*)
+    echo "opencode-checkout: invalid repository '$spec'" >&2
+    exit 2
+    ;;
+esac
+
+target="$workspace/$name"
+url="https://github.com/$owner/$name"
+
+if [ -e "$target" ]; then
+  if [ ! -d "$target/.git" ]; then
+    echo "opencode-checkout: $target already exists and is not a Git checkout" >&2
+    exit 1
+  fi
+  remote="$(git -C "$target" remote get-url origin 2>/dev/null || true)"
+  case "$remote" in
+    *"$owner/$name"*) ;;
+    *)
+      echo "opencode-checkout: $target already tracks $remote, not $owner/$name" >&2
+      exit 1
+      ;;
+  esac
+  echo "opencode-checkout: refreshing $target" >&2
+  if [ -n "$branch" ]; then
+    git -C "$target" fetch --quiet origin "$branch"
+    git -C "$target" checkout --quiet "$branch"
+  else
+    git -C "$target" pull --ff-only --quiet
+  fi
+  echo "$target"
+  exit 0
+fi
+
+mkdir -p "$workspace"
+if [ -n "$branch" ]; then
+  git clone --branch "$branch" "$url" "$target"
+else
+  git clone "$url" "$target"
+fi
+echo "$target"

@@ -32,9 +32,18 @@ on:
         required: true
         description: Docker hub Token
 
+permissions:
+  contents: read
+
 jobs:
   build_images:
     runs-on: ubuntu-latest
+    # The GHCR push needs packages: write on GITHUB_TOKEN. Without it the
+    # registry rejects the manifest upload with "permission_denied:
+    # read_package" and the Docker Hub push never runs.
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7

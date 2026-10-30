@@ -9,6 +9,9 @@ on:
 # ONLY EVER RUN ONE
 concurrency: ${{ github.workflow }}
 
+permissions:
+  contents: read
+
 jobs:
   generate-all-matrix:
     runs-on: ubuntu-latest
@@ -50,6 +53,11 @@ jobs:
 
   build-images:
     needs: generate-all-matrix
+    # A reusable workflow can only narrow the permissions granted here, so the
+    # GHCR push needs packages: write on the caller as well.
+    permissions:
+      contents: read
+      packages: write
     strategy:
       fail-fast: false
       matrix: ${{fromJson( needs.generate-all-matrix.outputs.matrix )}}

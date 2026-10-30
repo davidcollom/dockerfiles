@@ -9,6 +9,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   generate-changed-matrix:
     runs-on: ubuntu-latest
@@ -48,6 +51,11 @@ jobs:
 
   build-images:
     needs: generate-changed-matrix
+    # A reusable workflow can only narrow the permissions granted here, so the
+    # GHCR push needs packages: write on the caller as well.
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix: ${{fromJson( needs.generate-changed-matrix.outputs.matrix )}}
       fail-fast: false

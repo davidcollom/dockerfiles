@@ -94,7 +94,11 @@ jobs:
         with:
           platforms: ${{steps.set_meta.outputs.PLATFORMS}}
 
-      - name: Build and push
+      # Docker Hub and GHCR are pushed in separate steps so a registry
+      # authentication problem in one of them cannot stop the other from
+      # receiving the image. The second build reuses the exported build cache
+      # and only has to upload the manifests.
+      - name: Build and push to Docker Hub
         uses: docker/build-push-action@v7
         with:
           context: "${{inputs.image-name}}/"
@@ -102,8 +106,17 @@ jobs:
           pull: true
           build-args: VERSION=${{steps.set_meta.outputs.VERSION}}
           platforms: ${{steps.set_meta.outputs.PLATFORMS}}
-          tags: |
-            ghcr.io/davidcollom/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Build and push to GHCR
+        uses: docker/build-push-action@v7
+        with:
+          context: "${{inputs.image-name}}/"
+          push: ${{inputs.push}}
+          pull: true
+          build-args: VERSION=${{steps.set_meta.outputs.VERSION}}
+          platforms: ${{steps.set_meta.outputs.PLATFORMS}}
+          tags: ghcr.io/davidcollom/${{inputs.image-name}}:${{steps.set_meta.outputs.VERSION}}
+          cache-from: type=gha

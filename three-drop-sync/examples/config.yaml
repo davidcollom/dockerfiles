@@ -1,0 +1,8 @@
+output: /library
+cookie-file: /run/secrets/session.cookie
+interval: 0s
+workers: 4
+max-files: 50
+max-file-size: 1GiB
+retries: 2
+dry-run: false

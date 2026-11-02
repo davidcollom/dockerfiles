@@ -1,0 +1,11 @@
+output: /library
+drive-file-id: REPLACE_WITH_DRIVE_FILE_ID
+drive-credentials-file: /run/secrets/drive_oauth
+interval: 6h
+max-manifest-age: 168h
+download: true
+workers: 4
+max-files: 50
+max-file-size: 1GiB
+retries: 2
+dry-run: false

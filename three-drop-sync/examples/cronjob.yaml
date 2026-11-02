@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: three-drop-sync
+spec:
+  # Initially suspended: verify account compatibility and provision storage first.
+  suspend: true
+  schedule: "0 2 * * *"
+  timeZone: Europe/London
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 3600
+      template:
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: sync
+              image: ghcr.io/davidcollom/three-drop-sync:0.1.0
+              args:
+                - sync
+                - --cookie-file=/run/secrets/session.cookie
+                - --output=/library
+                - --download
+                - --workers=4
+                - --max-files=50
+                - --max-file-size=1GiB
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: library
+                  mountPath: /library
+                - name: session
+                  mountPath: /run/secrets
+                  readOnly: true
+          volumes:
+            - name: library
+              persistentVolumeClaim:
+                claimName: three-drop-library
+            - name: session
+              secret:
+                secretName: three-drop-session
+                defaultMode: 0440
+                items:
+                  - key: cookie
+                    path: session.cookie

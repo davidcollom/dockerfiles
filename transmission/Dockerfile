@@ -7,7 +7,22 @@ RUN apk --no-cache --no-progress upgrade && \
     dir="/var/lib/transmission-daemon" && \
     file="$dir/info/settings.json" && \
     if [ -d /var/lib/transmission ]; then mv /var/lib/transmission $dir; else mkdir -p $dir; fi && \
-    (getent group transmission >/dev/null 2>&1 || addgroup -S transmission) && \
+    echo "--- diag: state ---" && \
+    ls -l /etc/passwd /etc/group && \
+    (grep transmission /etc/passwd || echo "NO transmission in /etc/passwd") && \
+    (grep transmission /etc/group || echo "NO transmission in /etc/group") && \
+    (command -v adduser || echo "no adduser") && \
+    (command -v addgroup || echo "no addgroup") && \
+    (command -v useradd || echo "no useradd") && \
+    (command -v usermod || echo "no usermod") && \
+    (command -v getent || echo "no getent") && \
+    echo "--- diag: create ---" && \
+    addgroup -S transmission; echo "addgroup rc=$?"; \
+    adduser -S -D -H -h $dir -s /sbin/nologin -G transmission transmission; echo "adduser rc=$?"; \
+    id transmission; echo "id rc=$?"; \
+    (grep transmission /etc/passwd || echo "STILL NO transmission in /etc/passwd") && \
+    (grep transmission /etc/group || echo "STILL NO transmission in /etc/group") && \
+    echo "--- diag: done ---" && \
     (id -u transmission >/dev/null 2>&1 || adduser -S -D -H -h $dir -s /sbin/nologin -G transmission transmission) && \
     usermod -d $dir transmission && \
     [[ -d $dir/downloads ]] || mkdir -p $dir/downloads && \

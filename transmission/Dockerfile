@@ -33,7 +33,7 @@ RUN apk --no-cache --no-progress upgrade && \
     echo '    "rpc-whitelist": "127.0.0.1",' >>$file && \
     echo '    "upload-limit": 100,' >>$file && \
     /bin/echo -e '    "upload-limit-enabled": 0\n}' >>$file && \
-    chown -Rh transmission. $dir && \
+    chown -Rh transmission $dir && \
     rm -rf /tmp/*
 
 COPY transmission.sh /usr/bin/

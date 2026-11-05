@@ -24,6 +24,7 @@ jobs:
       actions: write
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
+      empty: ${{ steps.matrix.outputs.empty }}
 
     steps:
     - uses: actions/checkout@v7
@@ -52,12 +53,14 @@ jobs:
         fi
         echo "matrix=$(cat images.list)" >> $GITHUB_OUTPUT
 
-    - name: Cancelling for empty matrix
-      if: ${{ steps.matrix.outputs.empty == 'true' }}
-      uses: andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1
+    # No image directory changed, so there is nothing to build. The build job
+    # below is skipped for an empty matrix, which keeps the run green instead
+    # of cancelling it and avoids the actions: write permission that
+    # andymckay/cancel-action needs in order to cancel the run.
 
   build-images:
     needs: generate-changed-matrix
+    if: ${{ needs.generate-changed-matrix.outputs.empty != 'true' }}
     # A reusable workflow can only narrow the permissions granted here, so the
     # GHCR push needs packages: write on the caller as well.
     permissions:

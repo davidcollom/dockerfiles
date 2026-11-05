@@ -117,7 +117,7 @@ watchdir="$(awk -F'=' '/"watch-dir"/ {print $2}' $dir/info/settings.json |
 [[ -d $dir/info/blocklists ]] || mkdir -p $dir/info/blocklists
 [[ $watchdir && ! -d $watchdir ]] && mkdir -p $watchdir
 
-chown -Rh transmission. $dir 2>&1 | grep -iv 'Read-only' || :
+chown -Rh transmission $dir 2>&1 | grep -iv 'Read-only' || :
 # Ensure su is owned by root to avoid setgid issues when using user namespaces in daemon
 chown root:root /bin/su
 
@@ -135,7 +135,7 @@ else
         url='http://list.iblocklist.com'
         curl -Ls "$url"'/?list=bt_level1&fileformat=p2p&archiveformat=gz' |
                     gzip -cd >$dir/info/blocklists/bt_level1
-        chown transmission. $dir/info/blocklists/bt_level1
+        chown transmission $dir/info/blocklists/bt_level1
     fi
     exec su -l transmission -s /bin/bash -c "exec transmission-daemon \
                 --allowed \\* --blocklist --config-dir $dir/info \

@@ -6,17 +6,7 @@ RUN apk --no-cache --no-progress upgrade && \
                 transmission-daemon tzdata && \
     dir="/var/lib/transmission-daemon" && \
     file="$dir/info/settings.json" && \
-    if [ -d /var/lib/transmission ]; then mv /var/lib/transmission $dir; else mkdir -p $dir; fi && \
-    usermod -d $dir transmission; echo "usermod rc=$?"; \
-    (grep transmission /etc/passwd || echo "NO transmission in /etc/passwd after usermod"); \
-    ls -l /etc/passwd*; \
-    command -v chown; \
-    chown -Rh transmission. $dir 2>&1; echo "dot rc=$?"; \
-    chown -Rh transmission $dir 2>&1; echo "plain rc=$?"; \
-    chown -Rh transmission:transmission $dir 2>&1; echo "colon rc=$?"; \
-    chown -Rh 100:101 $dir 2>&1; echo "numeric rc=$?"; \
-    echo "--- diag end ---" && false; \
-    (id -u transmission >/dev/null 2>&1 || adduser -S -D -H -h $dir -s /sbin/nologin -G transmission transmission) && \
+    mv /var/lib/transmission $dir && \
     usermod -d $dir transmission && \
     [[ -d $dir/downloads ]] || mkdir -p $dir/downloads && \
     [[ -d $dir/incomplete ]] || mkdir -p $dir/incomplete && \
@@ -43,7 +33,7 @@ RUN apk --no-cache --no-progress upgrade && \
     echo '    "rpc-whitelist": "127.0.0.1",' >>$file && \
     echo '    "upload-limit": 100,' >>$file && \
     /bin/echo -e '    "upload-limit-enabled": 0\n}' >>$file && \
-    chown -Rh transmission. $dir && \
+    chown -Rh transmission $dir && \
     rm -rf /tmp/*
 
 COPY transmission.sh /usr/bin/

@@ -13,7 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-ARG BASEIMAGE=registry.k8s.io/build-image/debian-base:bookworm-v1.0.9
+ARG BASEIMAGE=registry.k8s.io/build-image/debian-base:bookworm-v1.0.4
 
 FROM --platform=${TARGETPLATFORM} golang:1.21 as builder
 LABEL maintainer="Andy Xie <andy.xning@gmail.com>"

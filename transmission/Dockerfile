@@ -6,7 +6,9 @@ RUN apk --no-cache --no-progress upgrade && \
                 transmission-daemon tzdata && \
     dir="/var/lib/transmission-daemon" && \
     file="$dir/info/settings.json" && \
-    mv /var/lib/transmission $dir && \
+    if [ -d /var/lib/transmission ]; then mv /var/lib/transmission $dir; else mkdir -p $dir; fi && \
+    (getent group transmission >/dev/null 2>&1 || addgroup -S transmission) && \
+    (id -u transmission >/dev/null 2>&1 || adduser -S -D -H -h $dir -s /sbin/nologin -G transmission transmission) && \
     usermod -d $dir transmission && \
     [[ -d $dir/downloads ]] || mkdir -p $dir/downloads && \
     [[ -d $dir/incomplete ]] || mkdir -p $dir/incomplete && \

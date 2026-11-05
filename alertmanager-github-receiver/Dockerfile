@@ -1,4 +1,4 @@
-FROM  --platform=${TARGETPLATFORM} golang:1.20.0 as builder
+FROM  --platform=${TARGETPLATFORM} golang:1.26 as builder
 ENV GOPATH /go/
 ENV PATH $GOPATH/bin:$PATH
 

@@ -1,5 +1,5 @@
 # Start with the official Golang image for building the binary
-FROM --platform=${TARGETPLATFORM} golang:1.23 as builder
+FROM --platform=${TARGETPLATFORM} golang:1.26 as builder
 
 # Set the working directory inside the container
 WORKDIR /app

@@ -15,6 +15,13 @@ permissions:
 jobs:
   generate-changed-matrix:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # andymckay/cancel-action cancels the workflow run through the Actions
+      # API (POST /repos/{owner}/{repo}/actions/runs/{id}/cancel), which
+      # needs actions: write. Without it the empty-matrix path fails with
+      # "Resource not accessible by integration" and the run goes red.
+      actions: write
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
 

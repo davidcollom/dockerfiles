@@ -1,6 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -64,5 +68,53 @@ func TestAtomicOutput(t *testing.T) {
 	}
 	if !strings.Contains(string(got), "rpi-model=3-bplus") {
 		t.Fatalf("unexpected features: %s", got)
+	}
+}
+
+func TestNodeFeatureBody(t *testing.T) {
+	body, err := nodeFeatureBody("pi1", "nfd", featureLabels("Raspberry Pi 3 Model B Plus Rev 1.3", "a020d3"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var o struct {
+		APIVersion, Kind string
+		Metadata         struct {
+			Name, Namespace string
+			Labels          map[string]string
+		}
+		Spec struct{ Labels map[string]string }
+	}
+	if err := json.Unmarshal(body, &o); err != nil {
+		t.Fatal(err)
+	}
+	if o.APIVersion != "nfd.k8s-sigs.io/v1alpha1" || o.Kind != "NodeFeature" ||
+		o.Metadata.Name != "rpi-discovery-pi1" || o.Metadata.Namespace != "nfd" ||
+		o.Metadata.Labels["nfd.node.kubernetes.io/node-name"] != "pi1" ||
+		o.Spec.Labels["feature.node.kubernetes.io/rpi-model"] != "3-bplus" ||
+		o.Spec.Labels["feature.node.kubernetes.io/rpi-revision"] != "a020d3" ||
+		o.Spec.Labels["feature.node.kubernetes.io/rpi-present"] != "true" {
+		t.Fatalf("unexpected object: %s", body)
+	}
+}
+
+func TestApplyNodeFeature(t *testing.T) {
+	var method, path, ctype, auth, got string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		method, path, ctype, auth = r.Method, r.URL.Path, r.Header.Get("Content-Type"), r.Header.Get("Authorization")
+		b, _ := io.ReadAll(r.Body)
+		got = string(b)
+	}))
+	defer srv.Close()
+	if err := applyNodeFeature(srv.Client(), srv.URL, "tok", "nfd", "pi1", []byte("{}")); err != nil {
+		t.Fatal(err)
+	}
+	if method != "PATCH" || path != "/apis/nfd.k8s-sigs.io/v1alpha1/namespaces/nfd/nodefeatures/rpi-discovery-pi1" ||
+		ctype != "application/apply-patch+yaml" || auth != "Bearer tok" || got != "{}" {
+		t.Fatalf("bad request: %s %s %s %s %s", method, path, ctype, auth, got)
+	}
+	bad := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(403) }))
+	defer bad.Close()
+	if err := applyNodeFeature(bad.Client(), bad.URL, "tok", "nfd", "pi1", nil); err == nil {
+		t.Fatal("expected error on 403")
 	}
 }

@@ -2,7 +2,7 @@
 
 Minimal Go-based Raspberry Pi hardware discovery for the Node Feature Discovery (NFD) `local` source.
 
-Reads the host's device-tree model and optional `/proc/cpuinfo` revision, and atomically writes an NFD feature file to `features.d/rpi`. Does **not** require Kubernetes API permissions. Does **not** update health/status labels on every sample.
+Reads the host's device-tree model and optional `/proc/cpuinfo` revision, and publishes the labels as an NFD `NodeFeature` object (`nfd.k8s-sigs.io/v1alpha1`, named `rpi-discovery-<NODE_NAME>`, labelled `nfd.node.kubernetes.io/node-name`) in the pod's namespace, via server-side apply with the in-cluster ServiceAccount. The NFD master turns it into node labels. The container needs no root and no hostPath. Optionally (`-output`) it still writes the legacy `features.d` file. Does **not** update health/status labels on every sample.
 
 ## Labels
 
@@ -12,23 +12,26 @@ Reads the host's device-tree model and optional `/proc/cpuinfo` revision, and at
 
 ## Requirements
 
-Your deployed NFD worker must have the `local` source enabled **and must mount the same host path** (`/etc/kubernetes/node-feature-discovery/features.d`) as this DaemonSet.
+- Env `NODE_NAME` (downward API `spec.nodeName`).
+- A ServiceAccount allowed `get`, `create`, `update`, `patch` on `nodefeatures.nfd.k8s-sigs.io` in the pod's namespace (the NFD namespace).
+- NFD master v0.14+ (NodeFeature API enabled, the default).
+- Legacy file mode: set `-output /features.d/rpi` and mount the NFD worker's `features.d` host path with the `local` source enabled.
 
 Example local host test:
 
 ```sh
 go test ./...
 go run . -model /proc/device-tree/model -cpuinfo /proc/cpuinfo \
-  -output /tmp/rpi-nfd-features -interval 5m
+  -output /tmp/rpi-nfd-features -interval 5m   # file mode; set NODE_NAME in-cluster for NodeFeature mode
 ```
 
 Build and publish the multi-arch image before enabling the draft homelab deployment:
 
 ```sh
 docker buildx build --platform linux/arm/v7,linux/arm64,linux/amd64 \
-  -t davidcollom/rpi-nfd-discovery:0.1.0 --push .
+  -t davidcollom/rpi-nfd-discovery:0.2.0 --push .
 ```
 
-Image is not published merely by committing these source files. The image is intentionally distroless/non-root. The DaemonSet needs a writable host-mounted NFD features directory.
+Image is not published merely by committing these source files. The image is intentionally distroless/non-root.
 
 Throttling and undervoltage are deliberately out of scope for static NFD labels; they belong in Prometheus telemetry and alerts. A later exporter can expose `vcgencmd get_throttled` and associated events.

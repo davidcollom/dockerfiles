@@ -1,9 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
+	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -63,6 +70,75 @@ func featureContent(model, rev string) string {
 	return b.String()
 }
 
+func featureLabels(model, rev string) map[string]string {
+	l := map[string]string{
+		"feature.node.kubernetes.io/rpi-present": "true",
+		"feature.node.kubernetes.io/rpi-model":   modelID(model),
+	}
+	if rev != "" {
+		l["feature.node.kubernetes.io/rpi-revision"] = rev
+	}
+	return l
+}
+
+// nodeFeatureBody builds the NFD NodeFeature object for a node.
+func nodeFeatureBody(node, ns string, labels map[string]string) ([]byte, error) {
+	return json.Marshal(map[string]any{
+		"apiVersion": "nfd.k8s-sigs.io/v1alpha1",
+		"kind":       "NodeFeature",
+		"metadata": map[string]any{
+			"name":      "rpi-discovery-" + node,
+			"namespace": ns,
+			"labels":    map[string]string{"nfd.node.kubernetes.io/node-name": node},
+		},
+		"spec": map[string]any{"labels": labels},
+	})
+}
+
+// applyNodeFeature creates or updates the NodeFeature via server-side apply
+// (needs create+patch on nodefeatures).
+func applyNodeFeature(hc *http.Client, base, token, ns, node string, body []byte) error {
+	url := fmt.Sprintf("%s/apis/nfd.k8s-sigs.io/v1alpha1/namespaces/%s/nodefeatures/rpi-discovery-%s?fieldManager=rpi-nfd-discovery&force=true", base, ns, node)
+	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/apply-patch+yaml")
+	req.Header.Set("Authorization", "Bearer "+token)
+	resp, err := hc.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode/100 != 2 {
+		msg, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		return fmt.Errorf("apply NodeFeature: %s: %s", resp.Status, msg)
+	}
+	return nil
+}
+
+const saDir = "/var/run/secrets/kubernetes.io/serviceaccount/"
+
+// inClusterClient returns an API client, base URL and pod namespace.
+func inClusterClient() (*http.Client, string, string, error) { // 4th return unused
+	host, port := os.Getenv("KUBERNETES_SERVICE_HOST"), os.Getenv("KUBERNETES_SERVICE_PORT")
+	if host == "" || port == "" {
+		return nil, "", "", fmt.Errorf("not running in a cluster")
+	}
+	ca, err := os.ReadFile(saDir + "ca.crt")
+	if err != nil {
+		return nil, "", "", err
+	}
+	pool := x509.NewCertPool()
+	pool.AppendCertsFromPEM(ca)
+	ns, err := os.ReadFile(saDir + "namespace")
+	if err != nil {
+		return nil, "", "", err
+	}
+	hc := &http.Client{Timeout: 30 * time.Second, Transport: &http.Transport{TLSClientConfig: &tls.Config{RootCAs: pool}}}
+	return hc, "https://" + net.JoinHostPort(host, port), strings.TrimSpace(string(ns)), nil
+}
+
 func writeAtomic(path, data string) error {
 	dir := filepath.Dir(path)
 	tmp, err := os.CreateTemp(dir, ".rpi-nfd-*")
@@ -87,25 +163,57 @@ func writeAtomic(path, data string) error {
 func main() {
 	modelPath := flag.String("model", "/host/device-tree/model", "host device-tree model file")
 	cpuInfoPath := flag.String("cpuinfo", "/host/cpuinfo", "host /proc/cpuinfo")
-	output := flag.String("output", "/features.d/rpi", "NFD local feature file")
+	output := flag.String("output", "", "optional NFD local feature file (legacy; e.g. /features.d/rpi)")
 	interval := flag.Duration("interval", 5*time.Minute, "reconciliation interval")
 	flag.Parse()
 
 	if *interval <= 0 {
 		log.Fatal("interval must be positive")
 	}
+	node := os.Getenv("NODE_NAME")
+	if node == "" && *output == "" {
+		log.Fatal("set NODE_NAME (NodeFeature mode) and/or -output (file mode)")
+	}
+	var (
+		hc            *http.Client
+		base, ns      string
+		lastPublished string
+	)
+	if node != "" {
+		var err error
+		if hc, base, ns, err = inClusterClient(); err != nil {
+			log.Fatal(err)
+		}
+	}
 	for {
 		model, err := readModel(*modelPath)
 		if err != nil {
 			log.Printf("discovery failed: %v", err)
 		} else {
-			content := featureContent(model, revision(*cpuInfoPath))
-			old, err := os.ReadFile(*output)
-			if err != nil || string(old) != content {
-				if err := writeAtomic(*output, content); err != nil {
-					log.Printf("feature write failed: %v", err)
-				} else {
-					log.Printf("discovered %s (%s)", model, modelID(model))
+			rev := revision(*cpuInfoPath)
+			if *output != "" {
+				content := featureContent(model, rev)
+				old, err := os.ReadFile(*output)
+				if err != nil || string(old) != content {
+					if err := writeAtomic(*output, content); err != nil {
+						log.Printf("feature write failed: %v", err)
+					} else {
+						log.Printf("discovered %s (%s)", model, modelID(model))
+					}
+				}
+			}
+			if node != "" {
+				// Re-apply every interval (idempotent) so a deleted object self-heals.
+				body, _ := nodeFeatureBody(node, ns, featureLabels(model, rev))
+				token, err := os.ReadFile(saDir + "token") // re-read: projected tokens rotate
+				if err == nil {
+					err = applyNodeFeature(hc, base, strings.TrimSpace(string(token)), ns, node, body)
+				}
+				if err != nil {
+					log.Printf("NodeFeature update failed: %v", err)
+				} else if s := string(body); s != lastPublished {
+					lastPublished = s
+					log.Printf("published NodeFeature for %s (%s)", node, modelID(model))
 				}
 			}
 		}
